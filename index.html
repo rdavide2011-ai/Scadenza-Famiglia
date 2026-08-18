@@ -1829,6 +1829,138 @@
     ) fixed;
   }
 
+
+  /* ==========================================================
+     GESTIONE CATEGORIE
+  ========================================================== */
+
+  .category-manager{
+    margin-top:4px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .category-add{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:8px;
+  }
+
+  .category-add input{
+    width:100%;
+    min-height:44px;
+    box-sizing:border-box;
+    padding:10px 12px;
+    border-radius:11px;
+    border:1px solid var(--border);
+    background:var(--card-2);
+    color:var(--text);
+    font:inherit;
+    font-size:14px;
+    outline:none;
+  }
+
+  .category-add input:focus{
+    border-color:var(--accent);
+  }
+
+  .category-add button{
+    min-height:44px;
+    border:0;
+    border-radius:11px;
+    padding:0 14px;
+    background:var(--accent);
+    color:#04222f;
+    font:inherit;
+    font-size:13px;
+    font-weight:800;
+    cursor:pointer;
+  }
+
+  .category-list{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+    max-height:280px;
+    overflow-y:auto;
+    padding-right:2px;
+  }
+
+  .category-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    min-height:48px;
+    padding:7px 9px;
+    border:1px solid var(--border);
+    border-radius:11px;
+    background:var(--card);
+  }
+
+  .category-item-name{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:13px;
+    font-weight:700;
+  }
+
+  .category-item-actions{
+    display:flex;
+    gap:5px;
+    flex:0 0 auto;
+  }
+
+  .category-action{
+    width:35px;
+    height:35px;
+    border:0;
+    border-radius:9px;
+    background:var(--card-2);
+    color:var(--text);
+    font-size:15px;
+    cursor:pointer;
+  }
+
+  .category-action.delete{
+    color:#ef4444;
+  }
+
+  .category-empty{
+    color:var(--text-muted);
+    text-align:center;
+    padding:18px 8px;
+    font-size:12px;
+  }
+
+  .category-section{
+    margin-top:2px;
+  }
+
+  .category-section-title{
+    margin:0 0 8px;
+    font-size:13px;
+    font-weight:800;
+  }
+
+  @media (max-width:700px){
+    .category-list{
+      max-height:32vh;
+    }
+
+    .category-add input{
+      font-size:16px;
+    }
+
+    .category-action{
+      width:38px;
+      height:38px;
+    }
+  }
+
 </style>
 </head>
 
@@ -2657,6 +2789,41 @@
         </button>
       </div>
 
+      <div class="settings-row category-section">
+        <div class="settings-row-info">
+          <p class="settings-row-title">Categorie</p>
+          <p class="settings-row-desc">
+            Aggiungi, modifica o elimina le categorie condivise
+          </p>
+        </div>
+      </div>
+
+      <div class="category-manager">
+
+        <div class="category-add">
+          <input
+            type="text"
+            id="category-new-name"
+            maxlength="60"
+            placeholder="Nuova categoria…"
+            autocomplete="off"
+          >
+
+          <button
+            type="button"
+            id="category-add-btn"
+          >
+            + Aggiungi
+          </button>
+        </div>
+
+        <div
+          class="category-list"
+          id="category-list"
+        ></div>
+
+      </div>
+
       <div class="settings-row">
         <div class="settings-row-info">
           <p class="settings-row-title">Scadenze Famiglia</p>
@@ -2951,6 +3118,446 @@
 
   }
 
+
+  /* ==========================================================
+     GESTIONE CATEGORIE
+  ========================================================== */
+
+  let editingCategoryId = null;
+
+  function renderCategoryManager(){
+
+    const list =
+      $("category-list");
+
+    if(!list){
+      return;
+    }
+
+    list.innerHTML = "";
+
+    if(!categorie.length){
+
+      const empty =
+        document.createElement("div");
+
+      empty.className =
+        "category-empty";
+
+      empty.textContent =
+        "Nessuna categoria disponibile.";
+
+      list.appendChild(empty);
+
+      return;
+    }
+
+    categorie.forEach(category=>{
+
+      const item =
+        document.createElement("div");
+
+      item.className =
+        "category-item";
+
+      const name =
+        document.createElement("div");
+
+      name.className =
+        "category-item-name";
+
+      name.textContent =
+        (CATEGORY_EMOJI[category.nome] || "📦") +
+        " " +
+        category.nome;
+
+      const actions =
+        document.createElement("div");
+
+      actions.className =
+        "category-item-actions";
+
+      const edit =
+        document.createElement("button");
+
+      edit.type = "button";
+      edit.className =
+        "category-action";
+
+      edit.title =
+        "Modifica categoria";
+
+      edit.textContent =
+        "✏️";
+
+      edit.addEventListener(
+        "click",
+        ()=>{
+          startEditCategory(
+            category
+          );
+        }
+      );
+
+      const del =
+        document.createElement("button");
+
+      del.type = "button";
+      del.className =
+        "category-action delete";
+
+      del.title =
+        "Elimina categoria";
+
+      del.textContent =
+        "🗑️";
+
+      del.addEventListener(
+        "click",
+        ()=>{
+          deleteCategory(
+            category
+          );
+        }
+      );
+
+      actions.appendChild(edit);
+      actions.appendChild(del);
+
+      item.appendChild(name);
+      item.appendChild(actions);
+
+      list.appendChild(item);
+
+    });
+
+  }
+
+  function startEditCategory(category){
+
+    const input =
+      $("category-new-name");
+
+    const button =
+      $("category-add-btn");
+
+    if(!input || !button){
+      return;
+    }
+
+    editingCategoryId =
+      category.id;
+
+    input.value =
+      category.nome;
+
+    button.textContent =
+      "✓ Salva";
+
+    input.focus();
+
+    input.select();
+
+  }
+
+  function resetCategoryEditor(){
+
+    editingCategoryId =
+      null;
+
+    const input =
+      $("category-new-name");
+
+    const button =
+      $("category-add-btn");
+
+    if(input){
+      input.value = "";
+    }
+
+    if(button){
+      button.textContent =
+        "+ Aggiungi";
+    }
+
+  }
+
+  async function saveCategory(){
+
+    const input =
+      $("category-new-name");
+
+    if(!input){
+      return;
+    }
+
+    const nome =
+      input.value.trim();
+
+    if(!nome){
+
+      toast(
+        "Inserisci il nome della categoria",
+        "error"
+      );
+
+      input.focus();
+
+      return;
+    }
+
+    if(nome.length > 60){
+
+      toast(
+        "Il nome è troppo lungo",
+        "error"
+      );
+
+      return;
+    }
+
+    try{
+
+      if(isOffline()){
+        throw new Error("offline");
+      }
+
+      if(editingCategoryId){
+
+        const {
+          error
+        } =
+          await supabase
+            .from("categorie")
+            .update({
+              nome
+            })
+            .eq(
+              "id",
+              editingCategoryId
+            );
+
+        if(error){
+          throw error;
+        }
+
+        toast(
+          "Categoria modificata",
+          "success"
+        );
+
+      }else{
+
+        const {
+          error
+        } =
+          await supabase
+            .from("categorie")
+            .insert({
+              nome
+            });
+
+        if(error){
+          throw error;
+        }
+
+        toast(
+          "Categoria aggiunta",
+          "success"
+        );
+
+      }
+
+      resetCategoryEditor();
+
+      await loadCategorie();
+
+      renderCategoryManager();
+
+    }catch(err){
+
+      console.error(
+        "Errore salvataggio categoria:",
+        err
+      );
+
+      if(
+        err?.code === "23505"
+      ){
+
+        toast(
+          "Questa categoria esiste già",
+          "error"
+        );
+
+      }else if(
+        err?.message === "offline"
+      ){
+
+        toast(
+          "Connessione non disponibile",
+          "error"
+        );
+
+      }else{
+
+        toast(
+          "Impossibile salvare la categoria",
+          "error"
+        );
+
+      }
+
+    }
+
+  }
+
+  async function deleteCategory(category){
+
+    const conferma =
+      window.confirm(
+        `Eliminare la categoria "${category.nome}"?`
+      );
+
+    if(!conferma){
+      return;
+    }
+
+    try{
+
+      if(isOffline()){
+        throw new Error("offline");
+      }
+
+      const {
+        error
+      } =
+        await supabase
+          .from("categorie")
+          .delete()
+          .eq(
+            "id",
+            category.id
+          );
+
+      if(error){
+        throw error;
+      }
+
+      if(
+        currentCategoriaFilter ===
+        String(category.id)
+      ){
+
+        currentCategoriaFilter =
+          "";
+
+        const filter =
+          $("select-categoria-filter");
+
+        if(filter){
+          filter.value = "";
+        }
+
+      }
+
+      toast(
+        "Categoria eliminata",
+        "success"
+      );
+
+      resetCategoryEditor();
+
+      await loadCategorie();
+
+      renderCategoryManager();
+
+      render();
+
+    }catch(err){
+
+      console.error(
+        "Errore eliminazione categoria:",
+        err
+      );
+
+      if(
+        err?.code === "23503"
+      ){
+
+        toast(
+          "Non puoi eliminare una categoria ancora utilizzata da un alimento",
+          "error"
+        );
+
+      }else if(
+        err?.message === "offline"
+      ){
+
+        toast(
+          "Connessione non disponibile",
+          "error"
+        );
+
+      }else{
+
+        toast(
+          "Impossibile eliminare la categoria",
+          "error"
+        );
+
+      }
+
+    }
+
+  }
+
+  if($("category-add-btn")){
+
+    $("category-add-btn").addEventListener(
+      "click",
+      saveCategory
+    );
+
+  }
+
+  if($("category-new-name")){
+
+    $("category-new-name").addEventListener(
+      "keydown",
+      event=>{
+
+        if(event.key === "Enter"){
+          event.preventDefault();
+          saveCategory();
+        }
+
+        if(
+          event.key === "Escape"
+        ){
+          resetCategoryEditor();
+        }
+
+      }
+    );
+
+  }
+
+  /*
+     Quando apriamo le impostazioni mostriamo sempre
+     le categorie aggiornate dal database.
+  */
+  if($("nav-settings")){
+
+    $("nav-settings").addEventListener(
+      "click",
+      ()=>{
+        renderCategoryManager();
+      }
+    );
+
+  }
+
   loadTheme();
 
   $("btn-manual-add").addEventListener("click",()=>{
@@ -3132,6 +3739,8 @@
       if(error) throw error;
 
       categorie = data || [];
+
+      renderCategoryManager();
 
       const selFood =
         $("food-categoria");
