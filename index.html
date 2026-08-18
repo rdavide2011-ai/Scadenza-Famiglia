@@ -116,7 +116,8 @@
   .food-card.lvl-urgente{border-left-color:var(--urgente);}
   .food-card.lvl-attenzione{border-left-color:var(--attenzione);}
   .food-card.lvl-ok{border-left-color:var(--ok);}
-  .food-emoji{font-size:26px;width:42px;height:42px;border-radius:11px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .food-emoji{font-size:26px;width:42px;height:42px;border-radius:11px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex:0 0 auto;overflow:hidden;}
+  .food-emoji img{width:100%;height:100%;object-fit:cover;border-radius:11px;}
   .food-info{flex:1;min-width:0;}
   .food-name{font-weight:700;font-size:15px;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .food-brand{font-size:12.5px;color:var(--text-muted);margin:0 0 8px;}
@@ -189,8 +190,31 @@
   .divider-text{display:flex;align-items:center;gap:10px;color:var(--text-faint);font-size:12px;margin:16px 0;}
   .divider-text::before,.divider-text::after{content:'';flex:1;height:1px;background:var(--border);}
 
-  #reader{width:100%;border-radius:14px;overflow:hidden;background:#000;margin-bottom:12px;min-height:260px;}
-  .scan-status{text-align:center;color:var(--text-muted);font-size:13.5px;margin-bottom:10px;}
+  /* ---------- BARCODE PHOTO FLOW ---------- */
+  .bc-photo-wrap{width:100%;border-radius:16px;overflow:hidden;background:#000;margin-bottom:14px;position:relative;max-height:280px;display:flex;align-items:center;justify-content:center;}
+  .bc-photo-wrap img{width:100%;display:block;object-fit:contain;max-height:280px;}
+  .bc-state{text-align:center;}
+  .bc-analyzing{display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px 0 4px;}
+  .bc-analyzing .spinner{border-top-color:var(--accent);}
+  .bc-analyzing p{color:var(--text-muted);font-size:14px;margin:0;}
+  .bc-code-box{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:16px;margin:0 0 6px;}
+  .bc-code-box .lbl{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+  .bc-code-box .code{font-family:'Sora';font-weight:800;font-size:24px;letter-spacing:2px;color:var(--accent);}
+  .bc-code-box .fmt{font-size:12px;color:var(--text-faint);margin-top:4px;}
+  .bc-question{font-size:14.5px;color:var(--text);margin:14px 0 14px;font-weight:600;text-align:center;}
+  .bc-fail-icon{font-size:36px;display:block;margin-bottom:10px;}
+  .bc-fail-msg{color:var(--text-muted);font-size:14.5px;line-height:1.5;margin:0 0 20px;text-align:center;}
+
+  .product-found-banner{
+    display:flex;gap:12px;align-items:center;background:var(--ok-soft);border:1px solid rgba(62,207,142,.35);
+    border-radius:14px;padding:12px;margin-bottom:16px;
+  }
+  .product-found-banner img{width:46px;height:46px;border-radius:10px;object-fit:cover;background:var(--card-2);flex:0 0 auto;}
+  .product-found-banner .emoji-fallback{width:46px;height:46px;border-radius:10px;background:var(--card-2);display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto;}
+  .product-found-banner .pf-info{min-width:0;}
+  .product-found-banner .pf-label{font-size:11px;color:var(--ok);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin:0 0 2px;}
+  .product-found-banner .pf-name{font-size:14.5px;font-weight:700;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .product-found-banner .pf-meta{font-size:12.5px;color:var(--text-muted);margin:2px 0 0;}
 
   .confirm-body{text-align:center;padding:6px 4px 4px;}
   .confirm-body .ic{font-size:34px;margin-bottom:10px;display:block;}
@@ -205,6 +229,9 @@
   .toast.error{border-color:rgba(247,84,84,.4);}
   .toast.success{border-color:rgba(62,207,142,.4);}
   @keyframes toastIn{from{transform:translateY(-14px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+  /* elemento offscreen richiesto dalla libreria html5-qrcode per decodificare le immagini */
+  #barcode-reader-hidden{position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;}
 </style>
 </head>
 <body>
@@ -266,27 +293,78 @@
   <button class="fab" id="btn-fab-add" title="Aggiungi alimento">+</button>
 </div>
 
+<!-- MODAL: SCELTA AGGIUNTA -->
 <div class="modal-overlay hidden" id="modal-choice">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-header"><h2>Aggiungi alimento</h2><button class="modal-close" data-close="modal-choice">✕</button></div>
     <div class="scan-btn-row">
-      <button class="scan-cta" id="btn-open-scan"><span class="ic">📷</span> Scansiona codice a barre</button>
+      <button class="scan-cta" id="btn-open-scan"><span class="ic">📷</span> Fotografa codice a barre</button>
     </div>
     <div class="divider-text">oppure</div>
     <button class="btn btn-ghost" id="btn-manual-add">Inserisci manualmente</button>
   </div>
 </div>
 
-<div class="modal-overlay hidden" id="modal-scan">
+<!-- input file nascosto: apre direttamente la fotocamera su smartphone -->
+<input type="file" accept="image/*" capture="environment" id="input-barcode-photo" class="hidden">
+
+<!-- MODAL: ANALISI FOTO CODICE A BARRE -->
+<div class="modal-overlay hidden" id="modal-barcode">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-header"><h2>Scansiona codice a barre</h2><button class="modal-close" data-close="modal-scan">✕</button></div>
-    <div id="reader"></div>
-    <div class="scan-status" id="scan-status">Inquadra il codice a barre del prodotto</div>
+    <div class="modal-header"><h2>Codice a barre</h2><button class="modal-close" data-close="modal-barcode">✕</button></div>
+
+    <div class="bc-photo-wrap">
+      <img id="bc-photo-preview" src="" alt="Foto del codice a barre">
+    </div>
+
+    <!-- stato: analisi in corso -->
+    <div class="bc-state" id="bc-state-analyzing">
+      <div class="bc-analyzing">
+        <div class="spinner"></div>
+        <p>Analizzo il codice...</p>
+      </div>
+    </div>
+
+    <!-- stato: codice rilevato, richiesta conferma -->
+    <div class="bc-state hidden" id="bc-state-confirm">
+      <div class="bc-code-box">
+        <div class="lbl">Codice rilevato</div>
+        <div class="code" id="bc-detected-code">-</div>
+        <div class="fmt" id="bc-detected-format">-</div>
+      </div>
+      <p class="bc-question">È corretto?</p>
+      <div class="grid-2">
+        <button class="btn btn-ghost" id="btn-bc-retry">↻ Rifai foto</button>
+        <button class="btn btn-primary" id="btn-bc-confirm">✓ Conferma</button>
+      </div>
+    </div>
+
+    <!-- stato: lettura fallita -->
+    <div class="bc-state hidden" id="bc-state-failed">
+      <span class="bc-fail-icon">🔎</span>
+      <p class="bc-fail-msg">Non riesco a leggere il codice a barre. Prova a scattare una foto più nitida, con buona luce e il codice ben centrato.</p>
+      <div class="grid-2">
+        <button class="btn btn-ghost" id="btn-bc-manual">Inserisci manualmente</button>
+        <button class="btn btn-primary" id="btn-bc-retry-2">↻ Rifai foto</button>
+      </div>
+    </div>
+
+    <!-- stato: ricerca prodotto in corso -->
+    <div class="bc-state hidden" id="bc-state-searching">
+      <div class="bc-analyzing">
+        <div class="spinner"></div>
+        <p>Cerco il prodotto...</p>
+      </div>
+    </div>
   </div>
 </div>
 
+<!-- elemento richiesto dalla libreria per decodificare le immagini (non visibile) -->
+<div id="barcode-reader-hidden"></div>
+
+<!-- MODAL: AGGIUNGI/MODIFICA ALIMENTO -->
 <div class="modal-overlay hidden" id="modal-food">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -295,6 +373,17 @@
     <input type="hidden" id="food-id">
     <input type="hidden" id="food-prodotto-id">
     <input type="hidden" id="food-codice-barre">
+    <input type="hidden" id="food-immagine-url">
+
+    <div class="product-found-banner hidden" id="product-found-banner">
+      <img id="pf-image" src="" alt="" class="hidden">
+      <div class="emoji-fallback" id="pf-emoji-fallback">📦</div>
+      <div class="pf-info">
+        <p class="pf-label">Prodotto riconosciuto</p>
+        <p class="pf-name" id="pf-name">-</p>
+        <p class="pf-meta" id="pf-meta">-</p>
+      </div>
+    </div>
 
     <div class="field">
       <label>Prodotto</label>
@@ -349,6 +438,7 @@
   </div>
 </div>
 
+<!-- MODAL: CONFERMA ELIMINAZIONE -->
 <div class="modal-overlay center hidden" id="modal-delete">
   <div class="modal-sheet" style="border-radius:20px;">
     <div class="confirm-body">
@@ -375,7 +465,7 @@
 
   // Unica famiglia fissa: tutti gli alimenti appartengono a questo id.
   // Se famiglia_id ha un vincolo verso la tabella "famiglie", assicurati che
-  // esista una riga con questo id (vedi istruzioni finali).
+  // esista una riga con questo id.
   const FAMIGLIA_ID = "00000000-0000-0000-0000-000000000001";
 
   const CATEGORY_EMOJI = {
@@ -392,19 +482,16 @@
   let currentCategoriaFilter = "";
   let currentPosizioneFilter = "";
   let searchQuery = "";
-  let html5QrCode = null;
   let pendingDeleteId = null;
   let editingId = null;
+  let lastPhotoObjectUrl = null;
 
   const $ = (id) => document.getElementById(id);
   const show = (el) => el.classList.remove("hidden");
   const hide = (el) => el.classList.add("hidden");
 
   function openModal(id){ show($(id)); }
-  function closeModal(id){
-    hide($(id));
-    if(id === "modal-scan") stopScanner();
-  }
+  function closeModal(id){ hide($(id)); }
   document.querySelectorAll("[data-close]").forEach(btn=>{
     btn.addEventListener("click", ()=> closeModal(btn.dataset.close));
   });
@@ -436,6 +523,7 @@
     return messages[context] || messages.generic;
   }
 
+  /* ============== CATEGORIE ============== */
   async function loadCategorie(){
     try{
       const { data, error } = await supabase.from("categorie").select("*").order("nome");
@@ -466,6 +554,7 @@
     return CATEGORY_EMOJI[categoriaNome(id)] || "📦";
   }
 
+  /* ============== ALIMENTI: LOAD + REALTIME ============== */
   async function loadAlimenti(){
     try{
       const { data, error } = await supabase
@@ -501,6 +590,7 @@
       .subscribe();
   }
 
+  /* ============== STATO SCADENZA ============== */
   function getStatus(dataScadenzaStr){
     const oggi = new Date(); oggi.setHours(0,0,0,0);
     const scad = new Date(dataScadenzaStr + "T00:00:00");
@@ -519,6 +609,7 @@
     return { level:"ok", badge:`Scade il ${d}/${m}/${y}`, diffDays };
   }
 
+  /* ============== RENDER ============== */
   function passesFilters(a){
     if(searchQuery){
       const q = searchQuery.toLowerCase();
@@ -602,6 +693,7 @@
     return div.innerHTML;
   }
 
+  /* ============== FILTRI UI ============== */
   $("input-search").addEventListener("input", (e)=>{
     searchQuery = e.target.value.trim();
     render();
@@ -621,6 +713,7 @@
     currentPosizioneFilter = e.target.value; render();
   });
 
+  /* ============== AGGIUNTA / MODIFICA ALIMENTO ============== */
   $("btn-fab-add").addEventListener("click", ()=>{
     openModal("modal-choice");
   });
@@ -630,14 +723,14 @@
   });
   $("btn-open-scan").addEventListener("click", ()=>{
     closeModal("modal-choice");
-    openModal("modal-scan");
-    startScanner();
+    triggerPhotoCapture();
   });
 
   function resetFoodForm(){
     $("food-id").value = "";
     $("food-prodotto-id").value = "";
     $("food-codice-barre").value = "";
+    $("food-immagine-url").value = "";
     $("food-nome").value = "";
     $("food-marca").value = "";
     $("food-categoria").value = categorie.length ? categorie[0].id : "";
@@ -647,6 +740,27 @@
     $("food-posizione").value = "Frigorifero";
     $("food-note").value = "";
     $("err-food").classList.remove("show");
+    hide($("product-found-banner"));
+  }
+
+  function showProductFoundBanner(info){
+    // info: { nome, marca, categoria_id, immagine_url }
+    if(!info || !info.nome){ hide($("product-found-banner")); return; }
+    $("pf-name").textContent = info.nome;
+    const metaParts = [];
+    if(info.marca) metaParts.push(info.marca);
+    metaParts.push(categoriaNome(info.categoria_id));
+    $("pf-meta").textContent = metaParts.join(" · ");
+    if(info.immagine_url){
+      $("pf-image").src = info.immagine_url;
+      show($("pf-image"));
+      hide($("pf-emoji-fallback"));
+    }else{
+      hide($("pf-image"));
+      $("pf-emoji-fallback").textContent = categoriaEmoji(info.categoria_id);
+      show($("pf-emoji-fallback"));
+    }
+    show($("product-found-banner"));
   }
 
   function openAddModal(prefill){
@@ -655,9 +769,13 @@
     if(prefill){
       $("food-prodotto-id").value = prefill.prodotto_id || "";
       $("food-codice-barre").value = prefill.codice_barre || "";
+      $("food-immagine-url").value = prefill.immagine_url || "";
       $("food-nome").value = prefill.nome || "";
       $("food-marca").value = prefill.marca || "";
       if(prefill.categoria_id) $("food-categoria").value = prefill.categoria_id;
+      if(prefill.nome){
+        showProductFoundBanner(prefill);
+      }
     }
     $("food-modal-title").textContent = "Nuovo alimento";
     $("btn-save-food").textContent = "Aggiungi alimento";
@@ -669,6 +787,7 @@
     $("food-id").value = a.id;
     $("food-prodotto-id").value = a.prodotto_id || "";
     $("food-codice-barre").value = a.codice_barre || "";
+    $("food-immagine-url").value = "";
     $("food-nome").value = a.nome || "";
     $("food-marca").value = a.marca || "";
     $("food-categoria").value = a.categoria_id || (categorie[0] && categorie[0].id) || "";
@@ -678,6 +797,7 @@
     $("food-posizione").value = a.posizione || "Frigorifero";
     $("food-note").value = a.note || "";
     $("err-food").classList.remove("show");
+    hide($("product-found-banner"));
     $("food-modal-title").textContent = "Modifica alimento";
     $("btn-save-food").textContent = "Salva modifiche";
     openModal("modal-food");
@@ -733,6 +853,7 @@
     }
   });
 
+  /* ============== ELIMINAZIONE ============== */
   function openDeleteModal(id){
     pendingDeleteId = id;
     openModal("modal-delete");
@@ -756,61 +877,187 @@
     }
   });
 
-  async function startScanner(){
-    $("scan-status").textContent = "Inquadra il codice a barre del prodotto";
-    try{
-      if(!window.Html5Qrcode){
-        $("scan-status").textContent = "Scanner non disponibile su questo dispositivo.";
-        return;
-      }
-      const devices = await Html5Qrcode.getCameras().catch(()=>null);
-      if(!devices || devices.length === 0){
-        $("scan-status").textContent = "Fotocamera non disponibile su questo dispositivo.";
-        return;
-      }
-      html5QrCode = new Html5Qrcode("reader", { formatsToSupport: [
+  /* ============== FOTO CODICE A BARRE ============== */
+  let html5QrCodeInstance = null;
+  function getScannerInstance(){
+    if(!html5QrCodeInstance){
+      html5QrCodeInstance = new Html5Qrcode("barcode-reader-hidden", { formatsToSupport: [
         Html5QrcodeSupportedFormats.EAN_13,
         Html5QrcodeSupportedFormats.EAN_8,
         Html5QrcodeSupportedFormats.UPC_A,
         Html5QrcodeSupportedFormats.UPC_E,
         Html5QrcodeSupportedFormats.CODE_128
       ]});
-      await html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 260, height: 140 } },
-        onScanSuccess,
-        ()=>{ /* scan failure per-frame: ignora */ }
-      );
-    }catch(err){
-      const msg = String(err && err.message || err || "");
-      if(msg.toLowerCase().includes("permission") || msg.toLowerCase().includes("notallowed")){
-        $("scan-status").textContent = "Permesso fotocamera negato. Abilita l'accesso alla fotocamera nelle impostazioni del browser.";
-      }else{
-        $("scan-status").textContent = "Fotocamera non disponibile su questo dispositivo.";
+    }
+    return html5QrCodeInstance;
+  }
+
+  function decodeFile(file){
+    const scanner = getScannerInstance();
+    return scanner.scanFile(file, false);
+  }
+
+  function loadImageFromFile(file){
+    return new Promise((resolve, reject)=>{
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = ()=>{ resolve(img); URL.revokeObjectURL(url); };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  function processCanvas(img, mode){
+    const canvas = document.createElement("canvas");
+    const scale = img.width < 900 ? 2 : 1;
+    canvas.width = img.width * scale;
+    canvas.height = img.height * scale;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imageData.data;
+    for(let i=0; i<d.length; i+=4){
+      let gray = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+      if(mode === "contrast"){
+        gray = (gray - 128) * 1.7 + 128;
+        gray = Math.max(0, Math.min(255, gray));
+      }else if(mode === "invert"){
+        gray = 255 - gray;
       }
+      d[i] = d[i+1] = d[i+2] = gray;
     }
+    ctx.putImageData(imageData, 0, 0);
+    return canvas;
   }
 
-  function stopScanner(){
-    if(html5QrCode){
-      html5QrCode.stop().then(()=>{ html5QrCode.clear(); html5QrCode=null; }).catch(()=>{ html5QrCode=null; });
-    }
+  function canvasToFile(canvas, filename){
+    return new Promise((resolve)=>{
+      canvas.toBlob((blob)=>{ resolve(new File([blob], filename, { type:"image/png" })); }, "image/png");
+    });
   }
 
-  let scanLock = false;
-  async function onScanSuccess(decodedText){
-    if(scanLock) return;
-    scanLock = true;
-    $("scan-status").textContent = "Codice rilevato: " + decodedText;
-    stopScanner();
-    closeModal("modal-scan");
-    await handleBarcodeResult(decodedText);
-    scanLock = false;
+  async function analyzeBarcodePhoto(file){
+    let decoded = null;
+    try{ decoded = await decodeFile(file); }catch(e){ decoded = null; }
+
+    if(!decoded){
+      try{
+        const img = await loadImageFromFile(file);
+        const c1 = processCanvas(img, "contrast");
+        const f1 = await canvasToFile(c1, "contrasto.png");
+        decoded = await decodeFile(f1);
+      }catch(e){ decoded = null; }
+    }
+
+    if(!decoded){
+      try{
+        const img = await loadImageFromFile(file);
+        const c2 = processCanvas(img, "invert");
+        const f2 = await canvasToFile(c2, "inverso.png");
+        decoded = await decodeFile(f2);
+      }catch(e){ decoded = null; }
+    }
+
+    return decoded;
   }
+
+  // Algoritmo standard del checksum GTIN (funziona per EAN-13, EAN-8, UPC-A)
+  function gtinChecksumValid(digits){
+    const arr = digits.split("").map(Number);
+    const checkDigit = arr.pop();
+    let sum = 0;
+    let weight = 3;
+    for(let i = arr.length - 1; i >= 0; i--){
+      sum += arr[i] * weight;
+      weight = (weight === 3) ? 1 : 3;
+    }
+    const calc = (10 - (sum % 10)) % 10;
+    return calc === checkDigit;
+  }
+
+  function validateBarcode(raw){
+    const digits = String(raw || "").replace(/\D/g, "");
+    if(digits.length === 13){
+      return { valid: gtinChecksumValid(digits), code: digits, format: "EAN-13" };
+    }
+    if(digits.length === 8){
+      return { valid: gtinChecksumValid(digits), code: digits, format: "EAN-8" };
+    }
+    if(digits.length === 12){
+      return { valid: gtinChecksumValid(digits), code: digits, format: "UPC-A" };
+    }
+    if(digits.length === 6 || digits.length === 7){
+      // UPC-E: formato compresso, validazione base sulla lunghezza/numericità
+      return { valid: true, code: digits, format: "UPC-E" };
+    }
+    return { valid: false, code: digits, format: null };
+  }
+
+  function triggerPhotoCapture(){
+    $("input-barcode-photo").value = "";
+    $("input-barcode-photo").click();
+  }
+
+  function bcShowState(stateId){
+    ["bc-state-analyzing","bc-state-confirm","bc-state-failed","bc-state-searching"].forEach(id=>{
+      if(id === stateId) show($(id)); else hide($(id));
+    });
+  }
+
+  $("input-barcode-photo").addEventListener("change", async (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+
+    if(lastPhotoObjectUrl) URL.revokeObjectURL(lastPhotoObjectUrl);
+    lastPhotoObjectUrl = URL.createObjectURL(file);
+    $("bc-photo-preview").src = lastPhotoObjectUrl;
+
+    openModal("modal-barcode");
+    bcShowState("bc-state-analyzing");
+
+    let decoded = null;
+    try{
+      decoded = await analyzeBarcodePhoto(file);
+    }catch(err){
+      decoded = null;
+    }
+
+    if(!decoded){
+      bcShowState("bc-state-failed");
+      return;
+    }
+
+    const validation = validateBarcode(decoded);
+    if(!validation.valid || !validation.code){
+      bcShowState("bc-state-failed");
+      return;
+    }
+
+    $("bc-detected-code").textContent = validation.code;
+    $("bc-detected-format").textContent = "Formato: " + validation.format;
+    bcShowState("bc-state-confirm");
+    $("btn-bc-confirm").dataset.code = validation.code;
+  });
+
+  $("btn-bc-retry").addEventListener("click", ()=>{ triggerPhotoCapture(); });
+  $("btn-bc-retry-2").addEventListener("click", ()=>{ triggerPhotoCapture(); });
+  $("btn-bc-manual").addEventListener("click", ()=>{
+    const code = $("bc-detected-code").textContent !== "-" ? $("bc-detected-code").textContent : "";
+    closeModal("modal-barcode");
+    openAddModal({ codice_barre: code || null, nome:"", marca:"" });
+  });
+  $("btn-bc-confirm").addEventListener("click", async ()=>{
+    const code = $("btn-bc-confirm").dataset.code;
+    if(!code) return;
+    bcShowState("bc-state-searching");
+    await handleBarcodeResult(code);
+    closeModal("modal-barcode");
+  });
 
   async function handleBarcodeResult(barcode){
     try{
       if(isOffline()) throw new Error("offline");
+
       const { data: prodottoLocale, error: err1 } = await supabase
         .from("prodotti")
         .select("*")
@@ -824,7 +1071,8 @@
           codice_barre: barcode,
           nome: prodottoLocale.nome,
           marca: prodottoLocale.marca,
-          categoria_id: prodottoLocale.categoria_id
+          categoria_id: prodottoLocale.categoria_id,
+          immagine_url: prodottoLocale.immagine_url
         });
         return;
       }
@@ -844,7 +1092,9 @@
       if(offProduct){
         const nome = offProduct.product_name || offProduct.product_name_it || "";
         const marca = (offProduct.brands || "").split(",")[0].trim();
+        const immagine = offProduct.image_url || null;
         const altroCategoria = categorie.find(c=>c.nome==="Altro");
+
         const { data: nuovoProdotto } = await supabase
           .from("prodotti")
           .upsert({
@@ -852,7 +1102,7 @@
             nome: nome || "Prodotto sconosciuto",
             marca: marca || null,
             categoria_id: altroCategoria ? altroCategoria.id : null,
-            immagine_url: offProduct.image_url || null,
+            immagine_url: immagine,
             updated_at: new Date().toISOString()
           }, { onConflict: "codice_barre" })
           .select()
@@ -863,7 +1113,8 @@
           codice_barre: barcode,
           nome: nome,
           marca: marca,
-          categoria_id: altroCategoria ? altroCategoria.id : null
+          categoria_id: altroCategoria ? altroCategoria.id : null,
+          immagine_url: immagine
         });
       }else{
         toast("Prodotto non trovato. Inseriscilo manualmente.", "error");
@@ -875,6 +1126,7 @@
     }
   }
 
+  /* ============== AVVIO APP ============== */
   async function init(){
     hide($("screen-loading"));
     show($("app"));
