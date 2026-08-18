@@ -549,10 +549,9 @@
   const SUPABASE_KEY = "sb_publishable_LhRxq5JLOBI8SW6JalG_Cw_jaV_Vagr";
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // Unica famiglia fissa: tutti gli alimenti appartengono a questo id.
-  // Se famiglia_id ha un vincolo verso la tabella "famiglie", assicurati che
-  // esista una riga con questo id.
-  const FAMIGLIA_ID = "00000000-0000-0000-0000-000000000001";
+  // Inventario unico e condiviso: non esiste login né selezione famiglia.
+  // Nessun famiglia_id viene inviato dal frontend: la colonna, se presente
+  // sul database, è opzionale e resta gestita lato Supabase (default/NULL).
 
   const CATEGORY_EMOJI = {
     "Latticini":"🥛","Carne":"🥩","Pesce":"🐟","Frutta":"🍎","Verdura":"🥦",
