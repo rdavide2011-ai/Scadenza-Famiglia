@@ -3318,6 +3318,32 @@
 
         }
 
+        const codiceBarre =
+          $("food-codice-barre")
+            .value
+            .trim() ||
+          null;
+
+        const marca =
+          $("food-marca")
+            .value
+            .trim() ||
+          null;
+
+        const categoriaId =
+          $("food-categoria")
+            .value ||
+          null;
+
+        const immagineUrl =
+          $("food-immagine-url")
+            .value
+            .trim() ||
+          null;
+
+        const now =
+          new Date().toISOString();
+
         const payload = {
 
           prodotto_id:
@@ -3326,22 +3352,14 @@
             null,
 
           codice_barre:
-            $("food-codice-barre")
-              .value ||
-            null,
+            codiceBarre,
 
           nome,
 
-          marca:
-            $("food-marca")
-              .value
-              .trim() ||
-            null,
+          marca,
 
           categoria_id:
-            $("food-categoria")
-              .value ||
-            null,
+            categoriaId,
 
           quantita:
             parseFloat(
@@ -3367,7 +3385,7 @@
             null,
 
           updated_at:
-            new Date().toISOString()
+            now
 
         };
 
@@ -3387,6 +3405,103 @@
 
           if(isOffline()){
             throw new Error("offline");
+          }
+
+          /*
+             SE IL BARCODE È NUOVO:
+             salva il prodotto nella tabella "prodotti".
+             Così la prossima scansione dello stesso barcode
+             lo riconoscerà direttamente da Supabase.
+          */
+          if(
+            !editingId &&
+            codiceBarre &&
+            nome &&
+            !payload.prodotto_id
+          ){
+
+            const {
+              data:nuovoProdotto,
+              error:productError
+            } =
+              await supabase
+                .from("prodotti")
+                .upsert(
+                  {
+                    codice_barre:
+                      codiceBarre,
+
+                    nome,
+
+                    marca,
+
+                    categoria_id:
+                      categoriaId,
+
+                    immagine_url:
+                      immagineUrl,
+
+                    fonte:
+                      "manuale",
+
+                    data_ultimo_aggiornamento:
+                      now,
+
+                    updated_at:
+                      now
+                  },
+                  {
+                    onConflict:
+                      "codice_barre"
+                  }
+                )
+                .select()
+                .single();
+
+            if(productError){
+              throw productError;
+            }
+
+            if(nuovoProdotto){
+              payload.prodotto_id =
+                nuovoProdotto.id;
+            }
+
+          }
+
+          /*
+             Se il prodotto era già presente in "prodotti"
+             ma per qualche motivo il suo ID non era nel form,
+             recuperalo comunque dal barcode.
+          */
+          if(
+            !editingId &&
+            codiceBarre &&
+            !payload.prodotto_id
+          ){
+
+            const {
+              data:prodottoEsistente,
+              error:lookupError
+            } =
+              await supabase
+                .from("prodotti")
+                .select("id")
+                .eq(
+                  "codice_barre",
+                  codiceBarre
+                )
+                .maybeSingle();
+
+            if(lookupError){
+              throw lookupError;
+            }
+
+            if(prodottoEsistente){
+              payload.prodotto_id =
+                prodottoEsistente.id;
+            }
+
           }
 
           if(editingId){
@@ -3426,10 +3541,20 @@
               throw error;
             }
 
-            toast(
-              "Alimento aggiunto",
-              "success"
-            );
+            if(
+              codiceBarre &&
+              !$("food-prodotto-id").value
+            ){
+              toast(
+                "Alimento aggiunto e barcode salvato",
+                "success"
+              );
+            }else{
+              toast(
+                "Alimento aggiunto",
+                "success"
+              );
+            }
 
           }
 
@@ -4973,6 +5098,12 @@
 
                 immagine_url:
                   immagine,
+
+                fonte:
+                  "open_food_facts",
+
+                data_ultimo_aggiornamento:
+                  new Date().toISOString(),
 
                 updated_at:
                   new Date().toISOString()
