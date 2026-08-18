@@ -545,43 +545,15 @@
 (function(){
   "use strict";
 
-  const SUPABASE_URL = "https://epeehnhcldjkyvmillog.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_LhRxq5JLOBI8SW6JalG_Cw_jaV_Vagr";
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  // Inventario unico e condiviso: non esiste login né selezione famiglia.
-  // Nessun famiglia_id viene inviato dal frontend: la colonna, se presente
-  // sul database, è opzionale e resta gestita lato Supabase (default/NULL).
-
-  const CATEGORY_EMOJI = {
-    "Latticini":"🥛","Carne":"🥩","Pesce":"🐟","Frutta":"🍎","Verdura":"🥦",
-    "Pasta e Riso":"🍝","Pane e Prodotti da Forno":"🍞","Conserve":"🥫","Surgelati":"🧊",
-    "Bevande":"🥤","Dolci":"🍰","Snack":"🍿","Salse e Condimenti":"🧂","Salumi":"🍖",
-    "Uova":"🥚","Altro":"📦"
-  };
-
-  let categorie = [];
-  let alimenti = [];
-  let realtimeChannel = null;
-  let currentFilter = "tutti";
-  let currentCategoriaFilter = "";
-  let currentPosizioneFilter = "";
-  let searchQuery = "";
-  let pendingDeleteId = null;
-  let editingId = null;
-
+  /* ==========================================================
+     HELPER DI BASE (nessuna dipendenza esterna)
+     ========================================================== */
   const $ = (id) => document.getElementById(id);
   const show = (el) => el.classList.remove("hidden");
   const hide = (el) => el.classList.add("hidden");
 
   function openModal(id){ show($(id)); }
   function closeModal(id){ hide($(id)); }
-  document.querySelectorAll("[data-close]").forEach(btn=>{
-    btn.addEventListener("click", ()=> closeModal(btn.dataset.close));
-  });
-  document.querySelectorAll(".modal-overlay").forEach(ov=>{
-    ov.addEventListener("click", (e)=>{ if(e.target === ov) closeModal(ov.id); });
-  });
 
   function toast(msg, type){
     const wrap = $("toast-wrap");
@@ -606,6 +578,91 @@
     };
     return messages[context] || messages.generic;
   }
+
+  /* ==========================================================
+     COLLEGAMENTO IMMEDIATO DELL'INTERFACCIA (UI-ONLY)
+     Questo blocco viene eseguito SUBITO, prima di toccare
+     Supabase o qualunque libreria esterna (ZXing compreso).
+     In questo modo i pulsanti dell'app (in particolare
+     "+ Aggiungi alimento") funzionano SEMPRE, anche se una
+     libreria esterna non si carica o va in errore.
+     ========================================================== */
+  document.querySelectorAll("[data-close]").forEach(btn=>{
+    btn.addEventListener("click", ()=> closeModal(btn.dataset.close));
+  });
+  document.querySelectorAll(".modal-overlay").forEach(ov=>{
+    ov.addEventListener("click", (e)=>{ if(e.target === ov) closeModal(ov.id); });
+  });
+
+  $("btn-fab-add").addEventListener("click", ()=>{
+    openModal("modal-choice");
+  });
+  $("btn-manual-add").addEventListener("click", ()=>{
+    closeModal("modal-choice");
+    openAddModal(null);
+  });
+  $("btn-open-scan").addEventListener("click", ()=>{
+    closeModal("modal-choice");
+    openScanModal();
+  });
+
+  /* ==========================================================
+     SUPABASE (inizializzazione protetta)
+     Se la libreria non è disponibile (CDN bloccato, rete
+     lenta, ecc.) l'app NON deve smettere di funzionare: usiamo
+     uno stub "offline" che restituisce errori gestiti invece
+     di bloccare l'intero script.
+     ========================================================== */
+  const SUPABASE_URL = "https://epeehnhcldjkyvmillog.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_LhRxq5JLOBI8SW6JalG_Cw_jaV_Vagr";
+
+  function createOfflineSupabaseStub(){
+    function chain(){
+      const obj = {};
+      const chainMethods = ["select","order","eq","insert","update","delete","upsert","maybeSingle","single"];
+      chainMethods.forEach(m=>{ obj[m] = ()=> chain(); });
+      obj.then = (resolve)=> resolve({ data:null, error:{ message:"Servizio non disponibile. Verifica la connessione e riprova." } });
+      obj.catch = ()=> obj;
+      return obj;
+    }
+    return {
+      from: ()=> chain(),
+      channel: ()=> ({ on: function(){ return this; }, subscribe: function(){ return this; } }),
+      removeChannel: ()=>{}
+    };
+  }
+
+  let supabase;
+  try{
+    if(!window.supabase || typeof window.supabase.createClient !== "function"){
+      throw new Error("Libreria Supabase (supabase-js) non caricata correttamente.");
+    }
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  }catch(initErr){
+    console.error("Errore inizializzazione Supabase:", initErr);
+    supabase = createOfflineSupabaseStub();
+  }
+
+  // Inventario unico e condiviso: non esiste login né selezione famiglia.
+  // Nessun famiglia_id viene inviato dal frontend: la colonna, se presente
+  // sul database, è opzionale e resta gestita lato Supabase (default/NULL).
+
+  const CATEGORY_EMOJI = {
+    "Latticini":"🥛","Carne":"🥩","Pesce":"🐟","Frutta":"🍎","Verdura":"🥦",
+    "Pasta e Riso":"🍝","Pane e Prodotti da Forno":"🍞","Conserve":"🥫","Surgelati":"🧊",
+    "Bevande":"🥤","Dolci":"🍰","Snack":"🍿","Salse e Condimenti":"🧂","Salumi":"🍖",
+    "Uova":"🥚","Altro":"📦"
+  };
+
+  let categorie = [];
+  let alimenti = [];
+  let realtimeChannel = null;
+  let currentFilter = "tutti";
+  let currentCategoriaFilter = "";
+  let currentPosizioneFilter = "";
+  let searchQuery = "";
+  let pendingDeleteId = null;
+  let editingId = null;
 
   /* ============== CATEGORIE ============== */
   async function loadCategorie(){
@@ -654,24 +711,28 @@
   }
 
   function subscribeRealtime(){
-    if(realtimeChannel) supabase.removeChannel(realtimeChannel);
-    realtimeChannel = supabase
-      .channel("alimenti-frigo-condiviso")
-      .on("postgres_changes",
-        { event:"*", schema:"public", table:"alimenti" },
-        (payload)=>{
-          if(payload.eventType === "INSERT"){
-            if(!alimenti.some(a=>a.id===payload.new.id)) alimenti.push(payload.new);
-          }else if(payload.eventType === "UPDATE"){
-            const idx = alimenti.findIndex(a=>a.id===payload.new.id);
-            if(idx>-1) alimenti[idx] = payload.new; else alimenti.push(payload.new);
-          }else if(payload.eventType === "DELETE"){
-            alimenti = alimenti.filter(a=>a.id !== payload.old.id);
+    try{
+      if(realtimeChannel) supabase.removeChannel(realtimeChannel);
+      realtimeChannel = supabase
+        .channel("alimenti-frigo-condiviso")
+        .on("postgres_changes",
+          { event:"*", schema:"public", table:"alimenti" },
+          (payload)=>{
+            if(payload.eventType === "INSERT"){
+              if(!alimenti.some(a=>a.id===payload.new.id)) alimenti.push(payload.new);
+            }else if(payload.eventType === "UPDATE"){
+              const idx = alimenti.findIndex(a=>a.id===payload.new.id);
+              if(idx>-1) alimenti[idx] = payload.new; else alimenti.push(payload.new);
+            }else if(payload.eventType === "DELETE"){
+              alimenti = alimenti.filter(a=>a.id !== payload.old.id);
+            }
+            render();
           }
-          render();
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
+    }catch(err){
+      console.error("Errore sottoscrizione realtime:", err);
+    }
   }
 
   /* ============== STATO SCADENZA ============== */
@@ -798,18 +859,6 @@
   });
 
   /* ============== AGGIUNTA / MODIFICA ALIMENTO ============== */
-  $("btn-fab-add").addEventListener("click", ()=>{
-    openModal("modal-choice");
-  });
-  $("btn-manual-add").addEventListener("click", ()=>{
-    closeModal("modal-choice");
-    openAddModal(null);
-  });
-  $("btn-open-scan").addEventListener("click", ()=>{
-    closeModal("modal-choice");
-    openScanModal();
-  });
-
   function resetFoodForm(){
     $("food-id").value = "";
     $("food-prodotto-id").value = "";
@@ -896,7 +945,6 @@
     if(!scadenza){ errEl.textContent = "Inserisci la data di scadenza."; errEl.classList.add("show"); return; }
 
     const payload = {
-      famiglia_id: FAMIGLIA_ID,
       prodotto_id: $("food-prodotto-id").value || null,
       codice_barre: $("food-codice-barre").value || null,
       nome,
@@ -961,18 +1009,27 @@
     }
   });
 
-  /* ============== FOTOCAMERA INTEGRATA + ANALISI FOTO SCATTATA (getUserMedia + ZXing) ============== */
+  /* ============== FOTOCAMERA INTEGRATA + ANALISI FOTO SCATTATA (getUserMedia + ZXing) ==============
+     Nulla in questa sezione viene eseguito al caricamento della pagina:
+     la fotocamera parte SOLO quando l'utente preme "📷 Fotografa codice a barre".
+     Un eventuale problema con la libreria ZXing (mancato caricamento, CDN
+     bloccato, ecc.) resta isolato qui e non influenza il resto dell'app. */
   const ZXING_FORMAT_LABELS = (function(){
-    if(typeof ZXing === "undefined") return {};
-    const BF = ZXing.BarcodeFormat;
-    const map = {};
-    map[BF.EAN_13] = "EAN-13";
-    map[BF.EAN_8] = "EAN-8";
-    map[BF.UPC_A] = "UPC-A";
-    map[BF.UPC_E] = "UPC-E";
-    map[BF.CODE_128] = "Code 128";
-    map[BF.CODE_39] = "Code 39";
-    return map;
+    try{
+      if(typeof ZXing === "undefined") return {};
+      const BF = ZXing.BarcodeFormat;
+      const map = {};
+      map[BF.EAN_13] = "EAN-13";
+      map[BF.EAN_8] = "EAN-8";
+      map[BF.UPC_A] = "UPC-A";
+      map[BF.UPC_E] = "UPC-E";
+      map[BF.CODE_128] = "Code 128";
+      map[BF.CODE_39] = "Code 39";
+      return map;
+    }catch(e){
+      console.error("Errore inizializzazione formati ZXing:", e);
+      return {};
+    }
   })();
 
   let zxingReader = null;          // istanza condivisa del lettore ZXing (usata SOLO per analizzare la foto scattata)
@@ -982,6 +1039,9 @@
   let scanModalOpen = false;
 
   function getZxingReader(){
+    if(typeof ZXing === "undefined"){
+      throw new Error("Libreria ZXing non disponibile.");
+    }
     if(!zxingReader){
       const hints = new Map();
       hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
@@ -1055,6 +1115,11 @@
     scanShowLiveState();
     stopCameraStream();
 
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      scanShowUnavailable();
+      return;
+    }
+
     const constraints = deviceId
       ? { video: { deviceId: { exact: deviceId } }, audio: false }
       : { video: { facingMode: { ideal: "environment" } }, audio: false };
@@ -1104,12 +1169,17 @@
   // Analizza la FOTO scattata (non il flusso video) con ZXing: vero riconoscimento
   // barcode da immagine, non OCR.
   async function decodeBarcodeFromCanvas(canvas){
-    const reader = getZxingReader();
-    const img = await canvasToImageElement(canvas);
     try{
-      return await reader.decodeFromImage(img);
+      const reader = getZxingReader();
+      const img = await canvasToImageElement(canvas);
+      try{
+        return await reader.decodeFromImage(img);
+      }catch(e){
+        return null; // nessun barcode trovato in questa foto
+      }
     }catch(e){
-      return null; // nessun barcode trovato in questa foto
+      console.error("Errore lettore barcode:", e);
+      return null;
     }
   }
 
@@ -1257,6 +1327,7 @@
   async function init(){
     hide($("screen-loading"));
     show($("app"));
+    resetFoodForm();
     await loadCategorie();
     resetFoodForm();
     await loadAlimenti();
@@ -1266,7 +1337,15 @@
   window.addEventListener("online", ()=> toast("Connessione ripristinata", "success"));
   window.addEventListener("offline", ()=> toast(friendlyError("generic"), "error"));
 
-  init();
+  // Anche in caso di errore imprevisto in init(), la dashboard deve
+  // comunque essere mostrata (niente spinner infinito) e i pulsanti
+  // devono restare utilizzabili.
+  init().catch(err=>{
+    console.error("Errore di avvio:", err);
+    hide($("screen-loading"));
+    show($("app"));
+    toast(friendlyError("generic"), "error");
+  });
 })();
 </script>
 </body>
