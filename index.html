@@ -1961,6 +1961,22 @@
     }
   }
 
+
+  /* GESTIONE POSIZIONI */
+  .position-manager{margin-top:4px;display:flex;flex-direction:column;gap:10px}
+  .position-add{display:grid;grid-template-columns:1fr auto;gap:8px}
+  .position-add input{width:100%;min-height:44px;box-sizing:border-box;padding:10px 12px;border-radius:11px;border:1px solid var(--border);background:var(--card-2);color:var(--text);font:inherit;font-size:14px;outline:none}
+  .position-add input:focus{border-color:var(--accent)}
+  .position-add button{min-height:44px;border:0;border-radius:11px;padding:0 14px;background:var(--accent);color:#04222f;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+  .position-list{display:flex;flex-direction:column;gap:7px;max-height:280px;overflow-y:auto;padding-right:2px}
+  .position-item{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;padding:7px 9px;border:1px solid var(--border);border-radius:11px;background:var(--card)}
+  .position-item-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:700}
+  .position-item-actions{display:flex;gap:5px;flex:0 0 auto}
+  .position-action{width:35px;height:35px;border:0;border-radius:9px;background:var(--card-2);color:var(--text);font-size:15px;cursor:pointer}
+  .position-action.delete{color:#ef4444}
+  .position-empty{color:var(--text-muted);text-align:center;padding:18px 8px;font-size:12px}
+  @media (max-width:700px){.position-list{max-height:32vh}.position-add input{font-size:16px}.position-action{width:38px;height:38px}}
+
 </style>
 </head>
 
@@ -2029,10 +2045,6 @@
 
       <select class="select-mini" id="select-posizione-filter">
         <option value="">Tutte le posizioni</option>
-        <option value="Frigorifero">Frigorifero</option>
-        <option value="Freezer">Freezer</option>
-        <option value="Dispensa">Dispensa</option>
-        <option value="Altro">Altro</option>
       </select>
 
     </div>
@@ -2608,23 +2620,7 @@
         </label>
 
         <select id="food-posizione">
-
-          <option value="Frigorifero">
-            Frigorifero
-          </option>
-
-          <option value="Freezer">
-            Freezer
-          </option>
-
-          <option value="Dispensa">
-            Dispensa
-          </option>
-
-          <option value="Altro">
-            Altro
-          </option>
-
+          <option value="">Seleziona posizione</option>
         </select>
 
       </div>
@@ -2824,6 +2820,21 @@
 
       </div>
 
+      <div class="settings-row category-section">
+        <div class="settings-row-info">
+          <p class="settings-row-title">Posizioni</p>
+          <p class="settings-row-desc">Gestisci frigorifero, freezer, dispensa e altre posizioni</p>
+        </div>
+      </div>
+
+      <div class="position-manager">
+        <div class="position-add">
+          <input type="text" id="position-new-name" maxlength="60" placeholder="Nuova posizione…" autocomplete="off">
+          <button type="button" id="position-add-btn">+ Aggiungi</button>
+        </div>
+        <div class="position-list" id="position-list"></div>
+      </div>
+
       <div class="settings-row">
         <div class="settings-row-info">
           <p class="settings-row-title">Scadenze Famiglia</p>
@@ -3006,9 +3017,13 @@
 
   if(navSettings){
 
-    navSettings.addEventListener("click",()=>{
+    navSettings.addEventListener("click",async ()=>{
 
       setActiveNav("nav-settings");
+
+      await loadPosizioni();
+
+      renderPositionManager();
 
       openModal("modal-settings");
 
@@ -3703,6 +3718,8 @@
 
   let categorie = [];
 
+  let posizioni = [];
+
   let alimenti = [];
 
   let realtimeChannel = null;
@@ -3962,6 +3979,313 @@
   /* ==========================================================
      STATO SCADENZA
   ========================================================== */
+
+
+  /* ==========================================================
+     POSIZIONI
+  ========================================================== */
+
+  let editingPositionId = null;
+
+  async function loadPosizioni(){
+
+    try{
+
+      const {data,error} =
+        await supabase
+          .from("posizioni")
+          .select("*")
+          .order("nome");
+
+      if(error) throw error;
+
+      posizioni = data || [];
+
+      const selFood = $("food-posizione");
+      const selFilter = $("select-posizione-filter");
+
+      if(selFood){
+        const current = selFood.value;
+        selFood.innerHTML =
+          '<option value="">Seleziona posizione</option>';
+
+        posizioni.forEach(p=>{
+          const opt=document.createElement("option");
+          opt.value=p.nome;
+          opt.textContent=p.nome;
+          selFood.appendChild(opt);
+        });
+
+        if(posizioni.some(p=>p.nome===current)){
+          selFood.value=current;
+        }
+      }
+
+      if(selFilter){
+        const current=selFilter.value;
+        selFilter.innerHTML =
+          '<option value="">Tutte le posizioni</option>';
+
+        posizioni.forEach(p=>{
+          const opt=document.createElement("option");
+          opt.value=p.nome;
+          opt.textContent=p.nome;
+          selFilter.appendChild(opt);
+        });
+
+        if(posizioni.some(p=>p.nome===current)){
+          selFilter.value=current;
+        }
+      }
+
+      renderPositionManager();
+
+    }catch(err){
+
+      console.error("Errore caricamento posizioni:",err);
+
+      toast(
+        err?.message ? "Supabase: "+err.message :
+        "Impossibile caricare le posizioni",
+        "error"
+      );
+
+    }
+
+  }
+
+  function renderPositionManager(){
+
+    const list=$("position-list");
+    if(!list) return;
+
+    list.innerHTML="";
+
+    if(!posizioni.length){
+      const empty=document.createElement("div");
+      empty.className="position-empty";
+      empty.textContent="Nessuna posizione disponibile.";
+      list.appendChild(empty);
+      return;
+    }
+
+    posizioni.forEach(position=>{
+
+      const item=document.createElement("div");
+      item.className="position-item";
+
+      const name=document.createElement("div");
+      name.className="position-item-name";
+      name.textContent=position.nome;
+
+      const actions=document.createElement("div");
+      actions.className="position-item-actions";
+
+      const edit=document.createElement("button");
+      edit.type="button";
+      edit.className="position-action";
+      edit.title="Modifica posizione";
+      edit.textContent="✏️";
+      edit.addEventListener("click",()=>startEditPosition(position));
+
+      const del=document.createElement("button");
+      del.type="button";
+      del.className="position-action delete";
+      del.title="Elimina posizione";
+      del.textContent="🗑️";
+      del.addEventListener("click",()=>deletePosition(position));
+
+      actions.append(edit,del);
+      item.append(name,actions);
+      list.appendChild(item);
+
+    });
+
+  }
+
+  function startEditPosition(position){
+
+    const input=$("position-new-name");
+    const button=$("position-add-btn");
+
+    if(!input || !button) return;
+
+    editingPositionId=position.id;
+    input.value=position.nome;
+    button.textContent="✓ Salva";
+    input.focus();
+    input.select();
+
+  }
+
+  function resetPositionEditor(){
+
+    editingPositionId=null;
+
+    const input=$("position-new-name");
+    const button=$("position-add-btn");
+
+    if(input) input.value="";
+    if(button) button.textContent="+ Aggiungi";
+
+  }
+
+  async function savePosition(){
+
+    const input=$("position-new-name");
+    if(!input) return;
+
+    const nome=input.value.trim();
+
+    if(!nome){
+      toast("Inserisci il nome della posizione","error");
+      input.focus();
+      return;
+    }
+
+    try{
+
+      if(isOffline()) throw new Error("offline");
+
+      if(editingPositionId){
+
+        const oldPosition=posizioni.find(
+          p=>String(p.id)===String(editingPositionId)
+        );
+
+        const oldName=oldPosition?.nome;
+
+        const {error} =
+          await supabase
+            .from("posizioni")
+            .update({nome})
+            .eq("id",editingPositionId);
+
+        if(error) throw error;
+
+        if(oldName && oldName!==nome){
+
+          const {error:foodError} =
+            await supabase
+              .from("alimenti")
+              .update({posizione:nome})
+              .eq("posizione",oldName);
+
+          if(foodError) throw foodError;
+
+          if(currentPosizioneFilter===oldName){
+            currentPosizioneFilter=nome;
+          }
+
+        }
+
+        toast("Posizione modificata","success");
+
+      }else{
+
+        const {error} =
+          await supabase
+            .from("posizioni")
+            .insert({nome});
+
+        if(error) throw error;
+
+        toast("Posizione aggiunta","success");
+
+      }
+
+      resetPositionEditor();
+      await loadPosizioni();
+      await loadAlimenti();
+
+    }catch(err){
+
+      console.error("Errore salvataggio posizione:",err);
+
+      if(err?.code==="23505"){
+        toast("Questa posizione esiste già","error");
+      }else if(err?.message==="offline"){
+        toast("Connessione non disponibile","error");
+      }else{
+        toast("Impossibile salvare la posizione","error");
+      }
+
+    }
+
+  }
+
+  async function deletePosition(position){
+
+    const used=alimenti.some(
+      a=>a.posizione===position.nome
+    );
+
+    if(used){
+      toast(
+        "Non puoi eliminare una posizione ancora utilizzata da un alimento",
+        "error"
+      );
+      return;
+    }
+
+    if(!window.confirm(`Eliminare la posizione "${position.nome}"?`)){
+      return;
+    }
+
+    try{
+
+      if(isOffline()) throw new Error("offline");
+
+      const {error} =
+        await supabase
+          .from("posizioni")
+          .delete()
+          .eq("id",position.id);
+
+      if(error) throw error;
+
+      if(currentPosizioneFilter===position.nome){
+        currentPosizioneFilter="";
+        const filter=$("select-posizione-filter");
+        if(filter) filter.value="";
+      }
+
+      resetPositionEditor();
+      toast("Posizione eliminata","success");
+
+      await loadPosizioni();
+      render();
+
+    }catch(err){
+
+      console.error("Errore eliminazione posizione:",err);
+
+      toast(
+        err?.message==="offline" ?
+          "Connessione non disponibile" :
+          "Impossibile eliminare la posizione",
+        "error"
+      );
+
+    }
+
+  }
+
+  if($("position-add-btn")){
+    $("position-add-btn").addEventListener("click",savePosition);
+  }
+
+  if($("position-new-name")){
+    $("position-new-name").addEventListener("keydown",event=>{
+      if(event.key==="Enter"){
+        event.preventDefault();
+        savePosition();
+      }
+      if(event.key==="Escape"){
+        resetPositionEditor();
+      }
+    });
+  }
 
   function getStatus(dataScadenzaStr){
 
