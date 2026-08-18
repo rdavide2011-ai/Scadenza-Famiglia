@@ -1581,6 +1581,254 @@
     }
   }
 
+
+  /* ==========================================================
+     BOTTOM NAVIGATION MOBILE
+  ========================================================== */
+
+  .bottom-nav{
+    position:fixed;
+    left:50%;
+    bottom:0;
+    transform:translateX(-50%);
+    width:min(100%, 640px);
+    z-index:40;
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    align-items:end;
+    padding:
+      8px 12px
+      calc(8px + var(--safe-bottom));
+    background:rgba(12,19,16,.92);
+    border-top:1px solid var(--border);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+  }
+
+  .bottom-nav-btn{
+    position:relative;
+    border:0;
+    background:transparent;
+    color:var(--text-muted);
+    min-height:54px;
+    border-radius:15px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    font-family:inherit;
+    cursor:pointer;
+    transition:
+      color .18s ease,
+      transform .18s ease,
+      background .18s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  .bottom-nav-btn .nav-icon{
+    font-size:20px;
+    line-height:1;
+    transition:transform .2s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .bottom-nav-btn .nav-label{
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.2px;
+  }
+
+  .bottom-nav-btn.active{
+    color:var(--accent);
+    background:var(--accent-soft);
+  }
+
+  .bottom-nav-btn.active .nav-icon{
+    transform:translateY(-1px) scale(1.08);
+  }
+
+  .bottom-nav-btn:active{
+    transform:scale(.93);
+  }
+
+  .bottom-nav-add{
+    width:58px;
+    height:58px;
+    min-height:58px;
+    margin:-13px auto 0;
+    border-radius:20px;
+    background:var(--accent);
+    color:#04222f;
+    box-shadow:0 10px 28px rgba(56,189,248,.35);
+  }
+
+  .bottom-nav-add .nav-icon{
+    font-size:29px;
+    font-weight:400;
+  }
+
+  .bottom-nav-add .nav-label{
+    font-size:9px;
+    color:#04222f;
+    margin-top:-1px;
+  }
+
+  .bottom-nav-add:active{
+    transform:scale(.91);
+  }
+
+  .bottom-nav-btn::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    bottom:3px;
+    width:0;
+    height:3px;
+    border-radius:10px;
+    background:var(--accent);
+    transform:translateX(-50%);
+    transition:width .2s ease;
+  }
+
+  .bottom-nav-btn.active::after{
+    width:18px;
+  }
+
+  /* Impostazioni */
+  .settings-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .settings-row{
+    width:100%;
+    min-height:56px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px 12px;
+    border-radius:13px;
+    background:var(--card);
+    border:1px solid var(--border);
+  }
+
+  .settings-row-info{
+    min-width:0;
+  }
+
+  .settings-row-title{
+    margin:0;
+    font-size:14px;
+    font-weight:700;
+  }
+
+  .settings-row-desc{
+    margin:3px 0 0;
+    color:var(--text-muted);
+    font-size:11.5px;
+  }
+
+  .theme-toggle{
+    display:flex;
+    padding:3px;
+    border-radius:10px;
+    background:var(--card-2);
+    border:1px solid var(--border);
+    flex:0 0 auto;
+  }
+
+  .theme-option{
+    border:0;
+    background:transparent;
+    color:var(--text-muted);
+    padding:7px 9px;
+    border-radius:8px;
+    font-size:11px;
+    font-weight:700;
+    cursor:pointer;
+  }
+
+  .theme-option.active{
+    background:var(--accent);
+    color:#04222f;
+  }
+
+  .settings-action{
+    border:0;
+    background:var(--card-2);
+    color:var(--text);
+    border-radius:10px;
+    padding:9px 11px;
+    font-family:inherit;
+    font-weight:700;
+    font-size:12px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+
+  /* Animazione apertura/chiusura pannello */
+  #modal-settings .modal-sheet{
+    animation:settingsUp .24s cubic-bezier(.2,.8,.2,1);
+  }
+
+  @keyframes settingsUp{
+    from{
+      transform:translateY(24px) scale(.98);
+      opacity:0;
+    }
+    to{
+      transform:translateY(0) scale(1);
+      opacity:1;
+    }
+  }
+
+  @media (max-width:700px){
+    .bottom-nav{
+      width:100%;
+      padding-left:10px;
+      padding-right:10px;
+    }
+
+    #app{
+      padding-bottom:
+        calc(94px + var(--safe-bottom));
+    }
+
+    .fab{
+      display:none;
+    }
+  }
+
+  /* Tema chiaro, opzionale dalle impostazioni */
+  body.theme-light{
+    --bg:#f4f7f5;
+    --bg-2:#ffffff;
+    --card:#ffffff;
+    --card-2:#edf2ef;
+    --border:rgba(0,0,0,.09);
+    --border-strong:rgba(0,0,0,.15);
+    --text:#17201c;
+    --text-muted:#66736c;
+    --text-faint:#8a9690;
+    --accent:#0ea5e9;
+    --accent-dark:#0284c7;
+    --accent-soft:rgba(14,165,233,.12);
+  }
+
+  body.theme-light .bottom-nav{
+    background:rgba(255,255,255,.92);
+  }
+
+  body.theme-light #app{
+    background:radial-gradient(
+      1200px 800px at 80% -10%,
+      #e8f5fa 0%,
+      var(--bg) 55%
+    ) fixed;
+  }
+
 </style>
 </head>
 
@@ -2334,6 +2582,95 @@
 
 </div>
 
+
+<!-- NAVIGAZIONE MOBILE -->
+<nav class="bottom-nav" id="bottom-nav" aria-label="Navigazione principale">
+
+  <button
+    class="bottom-nav-btn active"
+    id="nav-foods"
+    type="button"
+  >
+    <span class="nav-icon">🥗</span>
+    <span class="nav-label">Alimenti</span>
+  </button>
+
+  <button
+    class="bottom-nav-btn bottom-nav-add"
+    id="nav-add"
+    type="button"
+    aria-label="Aggiungi alimento"
+  >
+    <span class="nav-icon">+</span>
+    <span class="nav-label">Aggiungi</span>
+  </button>
+
+  <button
+    class="bottom-nav-btn"
+    id="nav-settings"
+    type="button"
+  >
+    <span class="nav-icon">⚙️</span>
+    <span class="nav-label">Impostazioni</span>
+  </button>
+
+</nav>
+
+<!-- MODAL: IMPOSTAZIONI -->
+<div class="modal-overlay hidden" id="modal-settings">
+
+  <div class="modal-sheet">
+
+    <div class="modal-handle"></div>
+
+    <div class="modal-header">
+      <h2>Impostazioni</h2>
+      <button class="modal-close" data-close="modal-settings">✕</button>
+    </div>
+
+    <div class="settings-list">
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <p class="settings-row-title">Tema</p>
+          <p class="settings-row-desc">Scegli l'aspetto dell'app</p>
+        </div>
+
+        <div class="theme-toggle">
+          <button class="theme-option" id="theme-dark" type="button">
+            🌙 Scuro
+          </button>
+          <button class="theme-option" id="theme-light" type="button">
+            ☀️ Chiaro
+          </button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <p class="settings-row-title">Aggiorna alimenti</p>
+          <p class="settings-row-desc">Ricarica i dati condivisi della famiglia</p>
+        </div>
+
+        <button class="settings-action" id="settings-refresh" type="button">
+          ↻ Aggiorna
+        </button>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <p class="settings-row-title">Scadenze Famiglia</p>
+          <p class="settings-row-desc">Inventario condiviso in tempo reale</p>
+        </div>
+        <span class="settings-action">v1</span>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
 <div
   class="toast-wrap"
   id="toast-wrap"
@@ -2447,11 +2784,174 @@
 
   });
 
-  $("btn-fab-add").addEventListener("click",()=>{
+  function openAddChoice(){
 
     openModal("modal-choice");
 
-  });
+  }
+
+  function setActiveNav(id){
+
+    document.querySelectorAll(".bottom-nav-btn")
+      .forEach(btn=>{
+        btn.classList.toggle(
+          "active",
+          btn.id === id
+        );
+      });
+
+  }
+
+  const navFoods = $("nav-foods");
+  const navAdd = $("nav-add");
+  const navSettings = $("nav-settings");
+
+  if(navFoods){
+
+    navFoods.addEventListener("click",()=>{
+
+      setActiveNav("nav-foods");
+
+      window.scrollTo({
+        top:0,
+        behavior:"smooth"
+      });
+
+    });
+
+  }
+
+  if(navAdd){
+
+    navAdd.addEventListener("click",()=>{
+
+      setActiveNav("nav-add");
+
+      openAddChoice();
+
+      setTimeout(()=>{
+        setActiveNav("nav-foods");
+      },220);
+
+    });
+
+  }
+
+  if(navSettings){
+
+    navSettings.addEventListener("click",()=>{
+
+      setActiveNav("nav-settings");
+
+      openModal("modal-settings");
+
+    });
+
+  }
+
+  /* Vecchio FAB: mantenuto come fallback, ma nascosto su mobile. */
+  if($("btn-fab-add")){
+
+    $("btn-fab-add").addEventListener("click",()=>{
+
+      openAddChoice();
+
+    });
+
+  }
+
+  /* ==========================================================
+     IMPOSTAZIONI
+  ========================================================== */
+
+  function applyTheme(theme){
+
+    document.body.classList.toggle(
+      "theme-light",
+      theme === "light"
+    );
+
+    if($("theme-dark")){
+      $("theme-dark").classList.toggle(
+        "active",
+        theme !== "light"
+      );
+    }
+
+    if($("theme-light")){
+      $("theme-light").classList.toggle(
+        "active",
+        theme === "light"
+      );
+    }
+
+    try{
+      localStorage.setItem(
+        "scadenze-theme",
+        theme
+      );
+    }catch(e){}
+
+  }
+
+  function loadTheme(){
+
+    let theme = "dark";
+
+    try{
+      theme =
+        localStorage.getItem(
+          "scadenze-theme"
+        ) || "dark";
+    }catch(e){}
+
+    applyTheme(theme);
+
+  }
+
+  if($("theme-dark")){
+
+    $("theme-dark").addEventListener(
+      "click",
+      ()=>{
+        applyTheme("dark");
+      }
+    );
+
+  }
+
+  if($("theme-light")){
+
+    $("theme-light").addEventListener(
+      "click",
+      ()=>{
+        applyTheme("light");
+      }
+    );
+
+  }
+
+  if($("settings-refresh")){
+
+    $("settings-refresh").addEventListener(
+      "click",
+      async ()=>{
+        closeModal("modal-settings");
+        setActiveNav("nav-foods");
+
+        if(typeof loadAlimenti === "function"){
+          await loadAlimenti();
+          toast(
+            "Dati aggiornati",
+            "success"
+          );
+        }
+      }
+    );
+
+  }
+
+  loadTheme();
 
   $("btn-manual-add").addEventListener("click",()=>{
 
