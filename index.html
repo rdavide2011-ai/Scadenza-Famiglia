@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
+
 <style>
   :root{
     --bg:#0c1310;
@@ -37,8 +38,17 @@
     --safe-top:env(safe-area-inset-top,0px);
     --safe-bottom:env(safe-area-inset-bottom,0px);
   }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;}
+
+  *{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  html,body{
+    margin:0;
+    padding:0;
+  }
+
   body{
     background:radial-gradient(1200px 800px at 80% -10%, #10201a 0%, var(--bg) 55%) fixed;
     color:var(--text);
@@ -46,240 +56,1128 @@
     min-height:100vh;
     -webkit-font-smoothing:antialiased;
   }
-  h1,h2,h3,.display{font-family:'Sora',system-ui,sans-serif;}
-  button{font-family:inherit;}
-  input,select,textarea{font-family:inherit;}
-  ::selection{background:var(--accent-soft);}
-  .hidden{display:none !important;}
-  a{color:inherit;}
+
+  h1,h2,h3,.display{
+    font-family:'Sora',system-ui,sans-serif;
+  }
+
+  button{
+    font-family:inherit;
+  }
+
+  input,select,textarea{
+    font-family:inherit;
+  }
+
+  ::selection{
+    background:var(--accent-soft);
+  }
+
+  .hidden{
+    display:none !important;
+  }
+
+  a{
+    color:inherit;
+  }
 
   #screen-loading{
-    position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-    background:var(--bg);z-index:100;
+    position:fixed;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    background:var(--bg);
+    z-index:100;
   }
-  .spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--border-strong);border-top-color:var(--accent);animation:spin .8s linear infinite;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .loading-label{color:var(--text-muted);font-size:14px;}
 
-  #app{max-width:640px;margin:0 auto;padding-bottom:110px;}
+  .spinner{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    border:3px solid var(--border-strong);
+    border-top-color:var(--accent);
+    animation:spin .8s linear infinite;
+  }
+
+  @keyframes spin{
+    to{transform:rotate(360deg);}
+  }
+
+  .loading-label{
+    color:var(--text-muted);
+    font-size:14px;
+  }
+
+  #app{
+    max-width:640px;
+    margin:0 auto;
+    padding-bottom:110px;
+  }
+
   header.topbar{
-    position:sticky;top:0;z-index:20;background:rgba(12,19,16,.88);backdrop-filter:blur(14px);
-    padding:calc(16px + var(--safe-top)) 18px 14px;border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:rgba(12,19,16,.88);
+    backdrop-filter:blur(14px);
+    padding:calc(16px + var(--safe-top)) 18px 14px;
+    border-bottom:1px solid var(--border);
   }
-  .topbar-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-  .topbar-title-wrap{display:flex;align-items:center;gap:10px;}
-  .brand-mark{width:36px;height:36px;border-radius:11px;background:linear-gradient(150deg,var(--accent),#1a6fa8);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 6px 16px rgba(56,189,248,.25);flex:0 0 auto;}
-  .topbar-title{font-family:'Sora';font-weight:700;font-size:19px;}
 
-  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
-  .stat-chip{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:10px 6px;text-align:center;}
-  .stat-chip .num{font-family:'Sora';font-weight:800;font-size:19px;display:block;}
-  .stat-chip .lbl{font-size:10.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;}
-  .stat-chip.st-scaduto .num{color:var(--scaduto);}
-  .stat-chip.st-urgente .num{color:var(--urgente);}
-  .stat-chip.st-ok .num{color:var(--ok);}
+  .topbar-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+  }
 
-  .search-wrap{position:relative;margin-bottom:12px;}
+  .topbar-title-wrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .brand-mark{
+    width:36px;
+    height:36px;
+    border-radius:11px;
+    background:linear-gradient(150deg,var(--accent),#1a6fa8);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    box-shadow:0 6px 16px rgba(56,189,248,.25);
+    flex:0 0 auto;
+  }
+
+  .topbar-title{
+    font-family:'Sora';
+    font-weight:700;
+    font-size:19px;
+  }
+
+  .stats-row{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    margin-bottom:14px;
+  }
+
+  .stat-chip{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:13px;
+    padding:10px 6px;
+    text-align:center;
+  }
+
+  .stat-chip .num{
+    font-family:'Sora';
+    font-weight:800;
+    font-size:19px;
+    display:block;
+  }
+
+  .stat-chip .lbl{
+    font-size:10.5px;
+    color:var(--text-muted);
+    text-transform:uppercase;
+    letter-spacing:.4px;
+  }
+
+  .stat-chip.st-scaduto .num{
+    color:var(--scaduto);
+  }
+
+  .stat-chip.st-urgente .num{
+    color:var(--urgente);
+  }
+
+  .stat-chip.st-ok .num{
+    color:var(--ok);
+  }
+
+  .search-wrap{
+    position:relative;
+    margin-bottom:12px;
+  }
+
   .search-wrap input{
-    width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);
-    padding:12px 14px 12px 40px;border-radius:12px;font-size:14.5px;outline:none;
+    width:100%;
+    background:var(--card);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:12px 14px 12px 40px;
+    border-radius:12px;
+    font-size:14.5px;
+    outline:none;
   }
-  .search-wrap input:focus{border-color:var(--accent);}
-  .search-wrap .search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-faint);font-size:15px;}
 
-  .filters-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
-  .filters-row::-webkit-scrollbar{display:none;}
+  .search-wrap input:focus{
+    border-color:var(--accent);
+  }
+
+  .search-wrap .search-icon{
+    position:absolute;
+    left:13px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--text-faint);
+    font-size:15px;
+  }
+
+  .filters-row{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:2px;
+    scrollbar-width:none;
+  }
+
+  .filters-row::-webkit-scrollbar{
+    display:none;
+  }
+
   .chip{
-    flex:0 0 auto;padding:8px 14px;border-radius:20px;background:var(--card);border:1px solid var(--border);
-    font-size:13px;font-weight:600;color:var(--text-muted);cursor:pointer;white-space:nowrap;
-  }
-  .chip.active{background:var(--accent);color:#04222f;border-color:var(--accent);}
-  .filters-row2{display:flex;gap:8px;margin-top:8px;}
-  .select-mini{
-    flex:1;background:var(--card);border:1px solid var(--border);color:var(--text-muted);
-    padding:8px 10px;border-radius:11px;font-size:13px;
+    flex:0 0 auto;
+    padding:8px 14px;
+    border-radius:20px;
+    background:var(--card);
+    border:1px solid var(--border);
+    font-size:13px;
+    font-weight:600;
+    color:var(--text-muted);
+    cursor:pointer;
+    white-space:nowrap;
   }
 
-  main.content{padding:16px 18px 8px;}
-  .section-empty{text-align:center;padding:60px 20px;color:var(--text-muted);}
-  .section-empty .emoji{font-size:44px;display:block;margin-bottom:14px;}
-  .section-empty h3{font-family:'Sora';color:var(--text);margin:0 0 6px;font-size:17px;}
-  .section-empty p{margin:0;font-size:14px;line-height:1.5;}
+  .chip.active{
+    background:var(--accent);
+    color:#04222f;
+    border-color:var(--accent);
+  }
+
+  .filters-row2{
+    display:flex;
+    gap:8px;
+    margin-top:8px;
+  }
+
+  .select-mini{
+    flex:1;
+    background:var(--card);
+    border:1px solid var(--border);
+    color:var(--text-muted);
+    padding:8px 10px;
+    border-radius:11px;
+    font-size:13px;
+  }
+
+  main.content{
+    padding:16px 18px 8px;
+  }
+
+  .section-empty{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--text-muted);
+  }
+
+  .section-empty .emoji{
+    font-size:44px;
+    display:block;
+    margin-bottom:14px;
+  }
+
+  .section-empty h3{
+    font-family:'Sora';
+    color:var(--text);
+    margin:0 0 6px;
+    font-size:17px;
+  }
+
+  .section-empty p{
+    margin:0;
+    font-size:14px;
+    line-height:1.5;
+  }
 
   .food-card{
-    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);
-    padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;
-    border-left:3px solid var(--border);cursor:pointer;transition:.15s;
-  }
-  .food-card:active{transform:scale(.99);}
-  .food-card.lvl-scaduto{border-left-color:var(--scaduto);}
-  .food-card.lvl-urgente{border-left-color:var(--urgente);}
-  .food-card.lvl-attenzione{border-left-color:var(--attenzione);}
-  .food-card.lvl-ok{border-left-color:var(--ok);}
-  .food-emoji{font-size:26px;width:42px;height:42px;border-radius:11px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex:0 0 auto;overflow:hidden;}
-  .food-emoji img{width:100%;height:100%;object-fit:cover;border-radius:11px;}
-  .food-info{flex:1;min-width:0;}
-  .food-name{font-weight:700;font-size:15px;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .food-brand{font-size:12.5px;color:var(--text-muted);margin:0 0 8px;}
-  .food-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
-  .meta-tag{font-size:11.5px;background:var(--card-2);color:var(--text-muted);padding:3px 8px;border-radius:7px;}
-  .status-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px;}
-  .status-badge.lvl-scaduto{background:var(--scaduto-soft);color:var(--scaduto);}
-  .status-badge.lvl-urgente{background:var(--urgente-soft);color:var(--urgente);}
-  .status-badge.lvl-attenzione{background:var(--attenzione-soft);color:var(--attenzione);}
-  .status-badge.lvl-ok{background:var(--ok-soft);color:var(--ok);}
-  .food-actions{display:flex;flex-direction:column;gap:6px;}
-  .food-actions button{
-    width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--card-2);
-    color:var(--text-muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;
-  }
-  .food-actions button.del:hover{color:var(--scaduto);border-color:var(--scaduto);}
-
-  .fab{
-    position:fixed;right:20px;bottom:calc(24px + var(--safe-bottom));z-index:30;
-    width:60px;height:60px;border-radius:50%;background:var(--accent);color:#04222f;border:none;
-    font-size:28px;box-shadow:0 10px 26px rgba(56,189,248,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:14px;
+    margin-bottom:10px;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    border-left:3px solid var(--border);
+    cursor:pointer;
     transition:.15s;
   }
-  .fab:active{transform:scale(.92);}
+
+  .food-card:active{
+    transform:scale(.99);
+  }
+
+  .food-card.lvl-scaduto{
+    border-left-color:var(--scaduto);
+  }
+
+  .food-card.lvl-urgente{
+    border-left-color:var(--urgente);
+  }
+
+  .food-card.lvl-attenzione{
+    border-left-color:var(--attenzione);
+  }
+
+  .food-card.lvl-ok{
+    border-left-color:var(--ok);
+  }
+
+  .food-emoji{
+    font-size:26px;
+    width:42px;
+    height:42px;
+    border-radius:11px;
+    background:var(--card-2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 auto;
+    overflow:hidden;
+  }
+
+  .food-emoji img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:11px;
+  }
+
+  .food-info{
+    flex:1;
+    min-width:0;
+  }
+
+  .food-name{
+    font-weight:700;
+    font-size:15px;
+    margin:0 0 2px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .food-brand{
+    font-size:12.5px;
+    color:var(--text-muted);
+    margin:0 0 8px;
+  }
+
+  .food-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:8px;
+    align-items:center;
+  }
+
+  .meta-tag{
+    font-size:11.5px;
+    background:var(--card-2);
+    color:var(--text-muted);
+    padding:3px 8px;
+    border-radius:7px;
+  }
+
+  .qty-control{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    background:var(--card-2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:2px;
+  }
+
+  .qty-control button{
+    width:24px;
+    height:24px;
+    border:0;
+    border-radius:6px;
+    background:transparent;
+    color:var(--text-muted);
+    cursor:pointer;
+    font-weight:800;
+    font-size:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .qty-control button:hover{
+    background:var(--border-strong);
+    color:var(--text);
+  }
+
+  .qty-control .qty-value{
+    min-width:34px;
+    text-align:center;
+    font-size:11.5px;
+    color:var(--text);
+    font-weight:700;
+  }
+
+  .status-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:12px;
+    font-weight:700;
+    padding:4px 10px;
+    border-radius:8px;
+  }
+
+  .status-badge.lvl-scaduto{
+    background:var(--scaduto-soft);
+    color:var(--scaduto);
+  }
+
+  .status-badge.lvl-urgente{
+    background:var(--urgente-soft);
+    color:var(--urgente);
+  }
+
+  .status-badge.lvl-attenzione{
+    background:var(--attenzione-soft);
+    color:var(--attenzione);
+  }
+
+  .status-badge.lvl-ok{
+    background:var(--ok-soft);
+    color:var(--ok);
+  }
+
+  .food-actions{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+
+  .food-actions button{
+    width:32px;
+    height:32px;
+    border-radius:9px;
+    border:1px solid var(--border);
+    background:var(--card-2);
+    color:var(--text-muted);
+    cursor:pointer;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .food-actions button.del:hover{
+    color:var(--scaduto);
+    border-color:var(--scaduto);
+  }
+
+  .fab{
+    position:fixed;
+    right:20px;
+    bottom:calc(24px + var(--safe-bottom));
+    z-index:30;
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    background:var(--accent);
+    color:#04222f;
+    border:none;
+    font-size:28px;
+    box-shadow:0 10px 26px rgba(56,189,248,.4);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:.15s;
+  }
+
+  .fab:active{
+    transform:scale(.92);
+  }
 
   .modal-overlay{
-    position:fixed;inset:0;background:rgba(4,8,6,.65);backdrop-filter:blur(3px);z-index:50;
-    display:flex;align-items:flex-end;justify-content:center;
+    position:fixed;
+    inset:0;
+    background:rgba(4,8,6,.65);
+    backdrop-filter:blur(3px);
+    z-index:50;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
   }
-  .modal-overlay.center{align-items:center;padding:20px;}
+
+  .modal-overlay.center{
+    align-items:center;
+    padding:20px;
+  }
+
   .modal-sheet{
-    width:100%;max-width:520px;background:var(--bg-2);border:1px solid var(--border);border-bottom:none;
-    border-radius:22px 22px 0 0;max-height:92vh;overflow-y:auto;padding:10px 20px calc(24px + var(--safe-bottom));
+    width:100%;
+    max-width:520px;
+    background:var(--bg-2);
+    border:1px solid var(--border);
+    border-bottom:none;
+    border-radius:22px 22px 0 0;
+    max-height:92vh;
+    overflow-y:auto;
+    padding:10px 20px calc(24px + var(--safe-bottom));
     animation:slideUp .22s ease-out;
   }
-  .modal-overlay.center .modal-sheet{border-radius:20px;border-bottom:1px solid var(--border);max-height:88vh;}
-  @keyframes slideUp{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-  .modal-handle{width:38px;height:4px;background:var(--border-strong);border-radius:3px;margin:8px auto 14px;}
-  .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-  .modal-header h2{font-size:18px;margin:0;}
-  .modal-close{width:32px;height:32px;border-radius:9px;background:var(--card);border:1px solid var(--border);color:var(--text-muted);cursor:pointer;font-size:16px;}
 
-  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .field{margin-bottom:16px;}
-  .field label{display:block;font-size:13px;color:var(--text-muted);margin-bottom:7px;font-weight:500;}
-  .field input,.field select,.field textarea{
-    width:100%;background:var(--bg-2);border:1px solid var(--border);color:var(--text);
-    padding:13px 14px;border-radius:11px;font-size:15px;outline:none;transition:.15s;
+  .modal-overlay.center .modal-sheet{
+    border-radius:20px;
+    border-bottom:1px solid var(--border);
+    max-height:88vh;
   }
-  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+
+  @keyframes slideUp{
+    from{
+      transform:translateY(30px);
+      opacity:0;
+    }
+    to{
+      transform:translateY(0);
+      opacity:1;
+    }
+  }
+
+  .modal-handle{
+    width:38px;
+    height:4px;
+    background:var(--border-strong);
+    border-radius:3px;
+    margin:8px auto 14px;
+  }
+
+  .modal-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+  }
+
+  .modal-header h2{
+    font-size:18px;
+    margin:0;
+  }
+
+  .modal-close{
+    width:32px;
+    height:32px;
+    border-radius:9px;
+    background:var(--card);
+    border:1px solid var(--border);
+    color:var(--text-muted);
+    cursor:pointer;
+    font-size:16px;
+  }
+
+  .grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  .field{
+    margin-bottom:16px;
+  }
+
+  .field label{
+    display:block;
+    font-size:13px;
+    color:var(--text-muted);
+    margin-bottom:7px;
+    font-weight:500;
+  }
+
+  .field input,
+  .field select,
+  .field textarea{
+    width:100%;
+    background:var(--bg-2);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:13px 14px;
+    border-radius:11px;
+    font-size:15px;
+    outline:none;
+    transition:.15s;
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-soft);
+  }
+
   .btn{
-    display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;cursor:pointer;
-    padding:14px 18px;border-radius:12px;font-weight:600;font-size:15px;transition:.15s;width:100%;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    border:none;
+    cursor:pointer;
+    padding:14px 18px;
+    border-radius:12px;
+    font-weight:600;
+    font-size:15px;
+    transition:.15s;
+    width:100%;
   }
-  .btn:active{transform:scale(.98);}
-  .btn-primary{background:var(--accent);color:#04222f;}
-  .btn-primary:hover{background:var(--accent-dark);}
-  .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
-  .btn-ghost{background:var(--card-2);color:var(--text);border:1px solid var(--border);}
-  .btn-danger{background:var(--scaduto);color:#2a0a0a;}
-  .form-error{color:var(--scaduto);font-size:13px;margin-top:-6px;margin-bottom:14px;display:none;}
-  .form-error.show{display:block;}
 
-  .scan-btn-row{margin-bottom:16px;}
+  .btn:active{
+    transform:scale(.98);
+  }
+
+  .btn-primary{
+    background:var(--accent);
+    color:#04222f;
+  }
+
+  .btn-primary:hover{
+    background:var(--accent-dark);
+  }
+
+  .btn-primary:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+  }
+
+  .btn-ghost{
+    background:var(--card-2);
+    color:var(--text);
+    border:1px solid var(--border);
+  }
+
+  .btn-danger{
+    background:var(--scaduto);
+    color:#2a0a0a;
+  }
+
+  .form-error{
+    color:var(--scaduto);
+    font-size:13px;
+    margin-top:-6px;
+    margin-bottom:14px;
+    display:none;
+  }
+
+  .form-error.show{
+    display:block;
+  }
+
+  .scan-btn-row{
+    margin-bottom:16px;
+  }
+
   .scan-cta{
-    display:flex;align-items:center;gap:12px;width:100%;background:var(--accent-soft);border:1px dashed var(--accent);
-    color:var(--accent);padding:14px;border-radius:13px;cursor:pointer;font-weight:600;font-size:14.5px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    width:100%;
+    background:var(--accent-soft);
+    border:1px dashed var(--accent);
+    color:var(--accent);
+    padding:14px;
+    border-radius:13px;
+    cursor:pointer;
+    font-weight:600;
+    font-size:14.5px;
   }
-  .scan-cta .ic{font-size:22px;}
-  .divider-text{display:flex;align-items:center;gap:10px;color:var(--text-faint);font-size:12px;margin:16px 0;}
-  .divider-text::before,.divider-text::after{content:'';flex:1;height:1px;background:var(--border);}
 
-  /* ---------- SCANSIONE LIVE FOTOCAMERA ---------- */
-  .scan-modal-overlay{position:fixed;inset:0;background:#000;z-index:60;display:flex;flex-direction:column;}
-  .scan-modal-overlay.hidden{display:none;}
-  #scan-state-live{display:flex;flex-direction:column;flex:1;min-height:0;}
-  #scan-state-live.hidden{display:none;}
+  .scan-cta .ic{
+    font-size:22px;
+  }
+
+  .divider-text{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:var(--text-faint);
+    font-size:12px;
+    margin:16px 0;
+  }
+
+  .divider-text::before,
+  .divider-text::after{
+    content:'';
+    flex:1;
+    height:1px;
+    background:var(--border);
+  }
+
+  .scan-modal-overlay{
+    position:fixed;
+    inset:0;
+    background:#000;
+    z-index:60;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .scan-modal-overlay.hidden{
+    display:none;
+  }
+
+  #scan-state-live{
+    display:flex;
+    flex-direction:column;
+    flex:1;
+    min-height:0;
+  }
+
+  #scan-state-live.hidden{
+    display:none;
+  }
+
   .scan-topbar{
-    position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;
+    position:relative;
+    z-index:5;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
     padding:calc(14px + var(--safe-top)) 16px 12px;
   }
-  .scan-topbar .scan-title{color:#fff;font-family:'Sora';font-weight:700;font-size:15px;}
+
+  .scan-topbar .scan-title{
+    color:#fff;
+    font-family:'Sora';
+    font-weight:700;
+    font-size:15px;
+  }
+
   .scan-icon-btn{
-    width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);
-    color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);
+    width:38px;
+    height:38px;
+    border-radius:11px;
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);
+    color:#fff;
+    cursor:pointer;
+    font-size:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    backdrop-filter:blur(6px);
   }
-  .scan-video-wrap{flex:1;position:relative;overflow:hidden;background:#000;}
-  #scan-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;}
-  .scan-frame-layer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+
+  .scan-video-wrap{
+    flex:1;
+    position:relative;
+    overflow:hidden;
+    background:#000;
+  }
+
+  #scan-video{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    background:#000;
+  }
+
+  .scan-frame-layer{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+  }
+
   .scan-frame-box{
-    width:78%;max-width:340px;aspect-ratio:16/9;border-radius:16px;position:relative;
-    box-shadow:0 0 0 2000px rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.85);
+    width:78%;
+    max-width:340px;
+    aspect-ratio:16/9;
+    border-radius:16px;
+    position:relative;
+    box-shadow:0 0 0 2000px rgba(0,0,0,.45);
+    border:2px solid rgba(255,255,255,.85);
   }
-  .scan-frame-box::before,.scan-frame-box::after,.scan-frame-corner-tl,.scan-frame-corner-br{content:'';}
-  .scan-frame-box .corner{position:absolute;width:26px;height:26px;border:3px solid var(--accent);}
-  .scan-frame-box .corner.tl{top:-2px;left:-2px;border-right:none;border-bottom:none;border-radius:10px 0 0 0;}
-  .scan-frame-box .corner.tr{top:-2px;right:-2px;border-left:none;border-bottom:none;border-radius:0 10px 0 0;}
-  .scan-frame-box .corner.bl{bottom:-2px;left:-2px;border-right:none;border-top:none;border-radius:0 0 0 10px;}
-  .scan-frame-box .corner.br{bottom:-2px;right:-2px;border-left:none;border-top:none;border-radius:0 0 10px 0;}
-  .scan-hint{color:#fff;font-size:14.5px;font-weight:600;margin-top:18px;text-shadow:0 1px 6px rgba(0,0,0,.5);text-align:center;padding:0 24px;}
+
+  .scan-frame-box .corner{
+    position:absolute;
+    width:26px;
+    height:26px;
+    border:3px solid var(--accent);
+  }
+
+  .scan-frame-box .corner.tl{
+    top:-2px;
+    left:-2px;
+    border-right:none;
+    border-bottom:none;
+    border-radius:10px 0 0 0;
+  }
+
+  .scan-frame-box .corner.tr{
+    top:-2px;
+    right:-2px;
+    border-left:none;
+    border-bottom:none;
+    border-radius:0 10px 0 0;
+  }
+
+  .scan-frame-box .corner.bl{
+    bottom:-2px;
+    left:-2px;
+    border-right:none;
+    border-top:none;
+    border-radius:0 0 0 10px;
+  }
+
+  .scan-frame-box .corner.br{
+    bottom:-2px;
+    right:-2px;
+    border-left:none;
+    border-top:none;
+    border-radius:0 0 10px 0;
+  }
+
+  .scan-hint{
+    color:#fff;
+    font-size:14.5px;
+    font-weight:600;
+    margin-top:18px;
+    text-shadow:0 1px 6px rgba(0,0,0,.5);
+    text-align:center;
+    padding:0 24px;
+  }
+
   .scan-capture-row{
-    position:absolute;left:0;right:0;bottom:calc(28px + var(--safe-bottom));z-index:6;
-    display:flex;align-items:center;justify-content:center;
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:calc(28px + var(--safe-bottom));
+    z-index:6;
+    display:flex;
+    align-items:center;
+    justify-content:center;
   }
+
   .scan-capture-btn{
-    display:flex;align-items:center;gap:10px;background:var(--accent);color:#04222f;border:none;
-    padding:15px 26px;border-radius:30px;font-weight:700;font-size:15.5px;cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--accent);
+    color:#04222f;
+    border:none;
+    padding:15px 26px;
+    border-radius:30px;
+    font-weight:700;
+    font-size:15.5px;
+    cursor:pointer;
     box-shadow:0 10px 26px rgba(56,189,248,.4);
   }
-  .scan-capture-btn:active{transform:scale(.96);}
-  .scan-status-panel{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;background:#0c1310;}
-  .scan-status-panel .ic{font-size:40px;margin-bottom:14px;}
-  .scan-status-panel h3{color:#fff;font-family:'Sora';font-size:17px;margin:0 0 8px;}
-  .scan-status-panel p{color:var(--text-muted);font-size:14px;line-height:1.5;margin:0 0 22px;max-width:320px;}
+
+  .scan-capture-btn:active{
+    transform:scale(.96);
+  }
+
+  .scan-status-panel{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px;
+    text-align:center;
+    background:#0c1310;
+  }
+
+  .scan-status-panel .ic{
+    font-size:40px;
+    margin-bottom:14px;
+  }
+
+  .scan-status-panel h3{
+    color:#fff;
+    font-family:'Sora';
+    font-size:17px;
+    margin:0 0 8px;
+  }
+
+  .scan-status-panel p{
+    color:var(--text-muted);
+    font-size:14px;
+    line-height:1.5;
+    margin:0 0 22px;
+    max-width:320px;
+  }
+
   .scan-bottom-sheet{
-    position:absolute;left:0;right:0;bottom:0;z-index:10;background:var(--bg-2);border-top:1px solid var(--border);
-    padding:18px 20px calc(20px + var(--safe-bottom));border-radius:18px 18px 0 0;
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:10;
+    background:var(--bg-2);
+    border-top:1px solid var(--border);
+    padding:18px 20px calc(20px + var(--safe-bottom));
+    border-radius:18px 18px 0 0;
     animation:slideUp .22s ease-out;
   }
-  .bc-state{text-align:center;}
-  .bc-analyzing{display:flex;flex-direction:column;align-items:center;gap:12px;padding:10px 0 4px;}
-  .bc-analyzing .spinner{border-top-color:var(--accent);}
-  .bc-analyzing p{color:var(--text-muted);font-size:14px;margin:0;}
-  .bc-code-box{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:16px;margin:0 0 6px;}
-  .bc-code-box .lbl{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
-  .bc-code-box .code{font-family:'Sora';font-weight:800;font-size:24px;letter-spacing:2px;color:var(--accent);}
-  .bc-code-box .fmt{font-size:12px;color:var(--text-faint);margin-top:4px;}
-  .bc-question{font-size:14.5px;color:var(--text);margin:14px 0 14px;font-weight:600;text-align:center;}
-  .bc-fail-icon{font-size:36px;display:block;margin-bottom:10px;}
-  .bc-fail-msg{color:var(--text-muted);font-size:14.5px;line-height:1.5;margin:0 0 6px;text-align:left;}
-  .bc-fail-tips{color:var(--text-muted);font-size:13.5px;line-height:1.7;margin:0 0 20px;padding-left:18px;text-align:left;}
-  .bc-searching{display:flex;flex-direction:column;align-items:center;gap:12px;padding:10px 0 4px;}
-  .bc-searching .spinner{border-top-color:var(--accent);}
-  .bc-searching p{color:var(--text-muted);font-size:14px;margin:0;}
+
+  .bc-state{
+    text-align:center;
+  }
+
+  .bc-analyzing{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+    padding:10px 0 4px;
+  }
+
+  .bc-analyzing .spinner{
+    border-top-color:var(--accent);
+  }
+
+  .bc-analyzing p{
+    color:var(--text-muted);
+    font-size:14px;
+    margin:0;
+  }
+
+  .bc-photo-preview{
+    width:100%;
+    max-height:150px;
+    object-fit:contain;
+    background:#000;
+    border:1px solid var(--border);
+    border-radius:12px;
+    margin-bottom:8px;
+  }
+
+  .bc-code-box{
+    background:var(--card-2);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:16px;
+    margin:0 0 6px;
+  }
+
+  .bc-code-box .lbl{
+    font-size:12px;
+    color:var(--text-muted);
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin-bottom:6px;
+  }
+
+  .bc-code-box .code{
+    font-family:'Sora';
+    font-weight:800;
+    font-size:24px;
+    letter-spacing:2px;
+    color:var(--accent);
+    word-break:break-all;
+  }
+
+  .bc-code-box .fmt{
+    font-size:12px;
+    color:var(--text-faint);
+    margin-top:4px;
+  }
+
+  .bc-question{
+    font-size:14.5px;
+    color:var(--text);
+    margin:14px 0 14px;
+    font-weight:600;
+    text-align:center;
+  }
+
+  .bc-fail-icon{
+    font-size:36px;
+    display:block;
+    margin-bottom:10px;
+  }
+
+  .bc-fail-msg{
+    color:var(--text-muted);
+    font-size:14.5px;
+    line-height:1.5;
+    margin:0 0 6px;
+    text-align:left;
+  }
+
+  .bc-fail-tips{
+    color:var(--text-muted);
+    font-size:13.5px;
+    line-height:1.7;
+    margin:0 0 20px;
+    padding-left:18px;
+    text-align:left;
+  }
+
+  .bc-searching{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+    padding:10px 0 4px;
+  }
+
+  .bc-searching .spinner{
+    border-top-color:var(--accent);
+  }
+
+  .bc-searching p{
+    color:var(--text-muted);
+    font-size:14px;
+    margin:0;
+  }
 
   .product-found-banner{
-    display:flex;gap:12px;align-items:center;background:var(--ok-soft);border:1px solid rgba(62,207,142,.35);
-    border-radius:14px;padding:12px;margin-bottom:16px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    background:var(--ok-soft);
+    border:1px solid rgba(62,207,142,.35);
+    border-radius:14px;
+    padding:12px;
+    margin-bottom:16px;
   }
-  .product-found-banner img{width:46px;height:46px;border-radius:10px;object-fit:cover;background:var(--card-2);flex:0 0 auto;}
-  .product-found-banner .emoji-fallback{width:46px;height:46px;border-radius:10px;background:var(--card-2);display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto;}
-  .product-found-banner .pf-info{min-width:0;}
-  .product-found-banner .pf-label{font-size:11px;color:var(--ok);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin:0 0 2px;}
-  .product-found-banner .pf-name{font-size:14.5px;font-weight:700;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .product-found-banner .pf-meta{font-size:12.5px;color:var(--text-muted);margin:2px 0 0;}
 
-  .confirm-body{text-align:center;padding:6px 4px 4px;}
-  .confirm-body .ic{font-size:34px;margin-bottom:10px;display:block;}
-  .confirm-body p{color:var(--text-muted);font-size:14.5px;line-height:1.5;margin:0 0 20px;}
+  .product-found-banner img{
+    width:46px;
+    height:46px;
+    border-radius:10px;
+    object-fit:cover;
+    background:var(--card-2);
+    flex:0 0 auto;
+  }
 
-  .toast-wrap{position:fixed;top:calc(16px + var(--safe-top));left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:100;pointer-events:none;}
+  .product-found-banner .emoji-fallback{
+    width:46px;
+    height:46px;
+    border-radius:10px;
+    background:var(--card-2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    flex:0 0 auto;
+  }
+
+  .product-found-banner .pf-info{
+    min-width:0;
+  }
+
+  .product-found-banner .pf-label{
+    font-size:11px;
+    color:var(--ok);
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.4px;
+    margin:0 0 2px;
+  }
+
+  .product-found-banner .pf-name{
+    font-size:14.5px;
+    font-weight:700;
+    margin:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .product-found-banner .pf-meta{
+    font-size:12.5px;
+    color:var(--text-muted);
+    margin:2px 0 0;
+  }
+
+  .confirm-body{
+    text-align:center;
+    padding:6px 4px 4px;
+  }
+
+  .confirm-body .ic{
+    font-size:34px;
+    margin-bottom:10px;
+    display:block;
+  }
+
+  .confirm-body p{
+    color:var(--text-muted);
+    font-size:14.5px;
+    line-height:1.5;
+    margin:0 0 20px;
+  }
+
+  .toast-wrap{
+    position:fixed;
+    top:calc(16px + var(--safe-top));
+    left:0;
+    right:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    z-index:100;
+    pointer-events:none;
+  }
+
   .toast{
-    background:#1a2420;border:1px solid var(--border-strong);color:var(--text);padding:12px 18px;border-radius:12px;
-    font-size:13.5px;box-shadow:var(--shadow);max-width:88%;display:flex;align-items:center;gap:8px;
+    background:#1a2420;
+    border:1px solid var(--border-strong);
+    color:var(--text);
+    padding:12px 18px;
+    border-radius:12px;
+    font-size:13.5px;
+    box-shadow:var(--shadow);
+    max-width:88%;
+    display:flex;
+    align-items:center;
+    gap:8px;
     animation:toastIn .25s ease-out;
   }
-  .toast.error{border-color:rgba(247,84,84,.4);}
-  .toast.success{border-color:rgba(62,207,142,.4);}
-  @keyframes toastIn{from{transform:translateY(-14px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 
+  .toast.error{
+    border-color:rgba(247,84,84,.4);
+  }
+
+  .toast.success{
+    border-color:rgba(62,207,142,.4);
+  }
+
+  @keyframes toastIn{
+    from{
+      transform:translateY(-14px);
+      opacity:0;
+    }
+    to{
+      transform:translateY(0);
+      opacity:1;
+    }
+  }
 </style>
 </head>
+
 <body>
 
 <div id="screen-loading">
@@ -288,7 +1186,9 @@
 </div>
 
 <div id="app" class="hidden">
+
   <header class="topbar">
+
     <div class="topbar-row">
       <div class="topbar-title-wrap">
         <div class="brand-mark">🥗</div>
@@ -297,15 +1197,34 @@
     </div>
 
     <div class="stats-row">
-      <div class="stat-chip"><span class="num" id="stat-totale">0</span><span class="lbl">Totale</span></div>
-      <div class="stat-chip st-scaduto"><span class="num" id="stat-scaduti">0</span><span class="lbl">Scaduti</span></div>
-      <div class="stat-chip st-urgente"><span class="num" id="stat-scadenza">0</span><span class="lbl">In scadenza</span></div>
-      <div class="stat-chip st-ok"><span class="num" id="stat-future">0</span><span class="lbl">Future</span></div>
+      <div class="stat-chip">
+        <span class="num" id="stat-totale">0</span>
+        <span class="lbl">Totale</span>
+      </div>
+
+      <div class="stat-chip st-scaduto">
+        <span class="num" id="stat-scaduti">0</span>
+        <span class="lbl">Scaduti</span>
+      </div>
+
+      <div class="stat-chip st-urgente">
+        <span class="num" id="stat-scadenza">0</span>
+        <span class="lbl">In scadenza</span>
+      </div>
+
+      <div class="stat-chip st-ok">
+        <span class="num" id="stat-future">0</span>
+        <span class="lbl">Future</span>
+      </div>
     </div>
 
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input type="text" id="input-search" placeholder="Cerca per nome, marca o codice a barre…">
+      <input
+        type="text"
+        id="input-search"
+        placeholder="Cerca per nome, marca o codice a barre…"
+      >
     </div>
 
     <div class="filters-row" id="filters-row">
@@ -315,8 +1234,13 @@
       <div class="chip" data-filter="attenzione">≤ 7 giorni</div>
       <div class="chip" data-filter="ok">OK</div>
     </div>
+
     <div class="filters-row2">
-      <select class="select-mini" id="select-categoria-filter"><option value="">Tutte le categorie</option></select>
+
+      <select class="select-mini" id="select-categoria-filter">
+        <option value="">Tutte le categorie</option>
+      </select>
+
       <select class="select-mini" id="select-posizione-filter">
         <option value="">Tutte le posizioni</option>
         <option value="Frigorifero">Frigorifero</option>
@@ -324,1029 +1248,3902 @@
         <option value="Dispensa">Dispensa</option>
         <option value="Altro">Altro</option>
       </select>
+
     </div>
+
   </header>
 
   <main class="content">
+
     <div id="lista-alimenti"></div>
+
     <div id="empty-state" class="section-empty hidden">
       <span class="emoji">🍽️</span>
       <h3>Nessun alimento trovato</h3>
       <p>Aggiungi il primo alimento con il pulsante +</p>
     </div>
+
   </main>
 
-  <button class="fab" id="btn-fab-add" title="Aggiungi alimento">+</button>
+  <button
+    class="fab"
+    id="btn-fab-add"
+    title="Aggiungi alimento"
+  >
+    +
+  </button>
+
 </div>
 
 <!-- MODAL: SCELTA AGGIUNTA -->
+
 <div class="modal-overlay hidden" id="modal-choice">
+
   <div class="modal-sheet">
+
     <div class="modal-handle"></div>
-    <div class="modal-header"><h2>Aggiungi alimento</h2><button class="modal-close" data-close="modal-choice">✕</button></div>
-    <div class="scan-btn-row">
-      <button class="scan-cta" id="btn-open-scan"><span class="ic">📷</span> Fotografa codice a barre</button>
+
+    <div class="modal-header">
+      <h2>Aggiungi alimento</h2>
+      <button class="modal-close" data-close="modal-choice">✕</button>
     </div>
-    <div class="divider-text">oppure</div>
-    <button class="btn btn-ghost" id="btn-manual-add">Inserisci manualmente</button>
+
+    <div class="scan-btn-row">
+
+      <button class="scan-cta" id="btn-open-scan">
+        <span class="ic">📷</span>
+        Fotografa codice a barre
+      </button>
+
+    </div>
+
+    <div class="divider-text">
+      oppure
+    </div>
+
+    <button class="btn btn-ghost" id="btn-manual-add">
+      Inserisci manualmente
+    </button>
+
   </div>
+
 </div>
 
-<!-- MODAL: FOTOCAMERA INTEGRATA PER CODICE A BARRE -->
+<!-- MODAL: FOTOCAMERA INTEGRATA -->
+
 <div class="scan-modal-overlay hidden" id="modal-scan">
 
-  <!-- stato: fotocamera live, in attesa dello scatto -->
   <div id="scan-state-live" class="hidden">
+
     <div class="scan-topbar">
-      <span class="scan-title">Codice a barre</span>
+
+      <span class="scan-title">
+        Codice a barre
+      </span>
+
       <div style="display:flex;gap:8px;">
-        <button class="scan-icon-btn hidden" id="btn-scan-switch-camera" title="Cambia fotocamera">🔄</button>
-        <button class="scan-icon-btn" id="btn-scan-close" title="Chiudi">✕</button>
+
+        <button
+          class="scan-icon-btn hidden"
+          id="btn-scan-switch-camera"
+          title="Cambia fotocamera"
+        >
+          🔄
+        </button>
+
+        <button
+          class="scan-icon-btn"
+          id="btn-scan-close"
+          title="Chiudi"
+        >
+          ✕
+        </button>
+
       </div>
+
     </div>
+
     <div class="scan-video-wrap">
-      <video id="scan-video" autoplay playsinline muted></video>
+
+      <video
+        id="scan-video"
+        autoplay
+        playsinline
+        muted
+      ></video>
+
       <div class="scan-frame-layer">
+
         <div class="scan-frame-box">
-          <div class="corner tl"></div><div class="corner tr"></div>
-          <div class="corner bl"></div><div class="corner br"></div>
+
+          <div class="corner tl"></div>
+          <div class="corner tr"></div>
+          <div class="corner bl"></div>
+          <div class="corner br"></div>
+
         </div>
-        <p class="scan-hint">Inquadra il codice a barre</p>
+
+        <p class="scan-hint">
+          Inquadra il codice a barre
+        </p>
+
       </div>
+
       <div class="scan-capture-row">
-        <button class="scan-capture-btn" id="btn-scan-capture">📸 Scatta foto</button>
+
+        <button
+          class="scan-capture-btn"
+          id="btn-scan-capture"
+        >
+          📸 Scatta foto
+        </button>
+
       </div>
+
     </div>
+
   </div>
 
-  <!-- stato: permesso fotocamera negato -->
-  <div class="scan-status-panel hidden" id="scan-state-denied">
+  <!-- FOTOCAMERA NEGATA -->
+
+  <div
+    class="scan-status-panel hidden"
+    id="scan-state-denied"
+  >
+
     <span class="ic">🚫</span>
-    <h3>Accesso alla fotocamera negato</h3>
-    <p>Per fotografare un codice a barre devi consentire l'accesso alla fotocamera.</p>
-    <div class="grid-2" style="max-width:320px;width:100%;">
-      <button class="btn btn-ghost" id="btn-scan-denied-close">Chiudi</button>
-      <button class="btn btn-primary" id="btn-scan-denied-retry">Riprova</button>
+
+    <h3>
+      Accesso alla fotocamera negato
+    </h3>
+
+    <p>
+      Per fotografare un codice a barre devi consentire l'accesso alla fotocamera.
+    </p>
+
+    <div
+      class="grid-2"
+      style="max-width:320px;width:100%;"
+    >
+
+      <button
+        class="btn btn-ghost"
+        id="btn-scan-denied-close"
+      >
+        Chiudi
+      </button>
+
+      <button
+        class="btn btn-primary"
+        id="btn-scan-denied-retry"
+      >
+        Riprova
+      </button>
+
     </div>
+
   </div>
 
-  <!-- stato: fotocamera non disponibile -->
-  <div class="scan-status-panel hidden" id="scan-state-unavailable">
+  <!-- FOTOCAMERA NON DISPONIBILE -->
+
+  <div
+    class="scan-status-panel hidden"
+    id="scan-state-unavailable"
+  >
+
     <span class="ic">📵</span>
-    <h3>Fotocamera non disponibile</h3>
-    <p>Non è stato possibile accedere a nessuna fotocamera su questo dispositivo.</p>
-    <div class="grid-2" style="max-width:320px;width:100%;">
-      <button class="btn btn-ghost" id="btn-scan-unavailable-manual">Inserisci manualmente</button>
-      <button class="btn btn-primary" id="btn-scan-unavailable-close">Chiudi</button>
+
+    <h3>
+      Fotocamera non disponibile
+    </h3>
+
+    <p>
+      Non è stato possibile accedere a nessuna fotocamera su questo dispositivo.
+    </p>
+
+    <div
+      class="grid-2"
+      style="max-width:320px;width:100%;"
+    >
+
+      <button
+        class="btn btn-ghost"
+        id="btn-scan-unavailable-manual"
+      >
+        Inserisci manualmente
+      </button>
+
+      <button
+        class="btn btn-primary"
+        id="btn-scan-unavailable-close"
+      >
+        Chiudi
+      </button>
+
     </div>
+
   </div>
 
-  <!-- pannello inferiore: analisi foto / conferma / esito / ricerca -->
-  <div class="scan-bottom-sheet hidden" id="scan-bottom-sheet">
-    <!-- stato: analisi della foto scattata -->
-    <div class="bc-state hidden" id="bc-state-analyzing">
+  <!-- RISULTATI SCANSIONE -->
+
+  <div
+    class="scan-bottom-sheet hidden"
+    id="scan-bottom-sheet"
+  >
+
+    <!-- ANALISI FOTO -->
+
+    <div
+      class="bc-state hidden"
+      id="bc-state-analyzing"
+    >
+
       <div class="bc-analyzing">
+
+        <img
+          id="bc-photo-preview"
+          class="bc-photo-preview"
+          alt="Foto del codice a barre"
+        >
+
         <div class="spinner"></div>
-        <p>Analizzo la foto...</p>
+
+        <p>
+          Analizzo la foto...
+        </p>
+
       </div>
+
     </div>
 
-    <!-- stato: codice rilevato, richiesta conferma -->
-    <div class="bc-state hidden" id="bc-state-confirm">
+    <!-- CONFERMA CODICE -->
+
+    <div
+      class="bc-state hidden"
+      id="bc-state-confirm"
+    >
+
       <div class="bc-code-box">
-        <div class="lbl">Codice rilevato</div>
-        <div class="code" id="bc-detected-code">-</div>
-        <div class="fmt" id="bc-detected-format">-</div>
+
+        <div class="lbl">
+          Codice rilevato
+        </div>
+
+        <div
+          class="code"
+          id="bc-detected-code"
+        >
+          -
+        </div>
+
+        <div
+          class="fmt"
+          id="bc-detected-format"
+        >
+          -
+        </div>
+
       </div>
-      <p class="bc-question">Il codice è corretto?</p>
+
+      <p class="bc-question">
+        Il codice è corretto?
+      </p>
+
       <div class="grid-2">
-        <button class="btn btn-ghost" id="btn-bc-retry">↻ Rifai foto</button>
-        <button class="btn btn-primary" id="btn-bc-confirm">✓ Usa questo codice</button>
+
+        <button
+          class="btn btn-ghost"
+          id="btn-bc-retry"
+        >
+          ↻ Rifai foto
+        </button>
+
+        <button
+          class="btn btn-primary"
+          id="btn-bc-confirm"
+        >
+          ✓ Usa questo codice
+        </button>
+
       </div>
+
     </div>
 
-    <!-- stato: barcode non riconosciuto dalla foto -->
-    <div class="bc-state hidden" id="bc-state-failed">
-      <span class="bc-fail-icon">🔎</span>
-      <p class="bc-fail-msg">Non riesco a leggere il codice a barre dalla foto.</p>
+    <!-- FALLIMENTO -->
+
+    <div
+      class="bc-state hidden"
+      id="bc-state-failed"
+    >
+
+      <span class="bc-fail-icon">
+        🔎
+      </span>
+
+      <p class="bc-fail-msg">
+        Non riesco a leggere il codice a barre dalla foto.
+      </p>
+
       <ul class="bc-fail-tips">
-        <li>Avvicina il prodotto</li>
-        <li>Assicurati che il barcode sia completamente visibile</li>
-        <li>Evita riflessi</li>
-        <li>Assicurati che ci sia abbastanza luce</li>
-        <li>Tieni il telefono fermo</li>
+
+        <li>
+          Avvicina il prodotto
+        </li>
+
+        <li>
+          Assicurati che il barcode sia completamente visibile
+        </li>
+
+        <li>
+          Evita riflessi
+        </li>
+
+        <li>
+          Assicurati che ci sia abbastanza luce
+        </li>
+
+        <li>
+          Tieni il telefono fermo
+        </li>
+
       </ul>
-      <button class="btn btn-primary" id="btn-bc-retry-2">📸 Rifai foto</button>
+
+      <button
+        class="btn btn-primary"
+        id="btn-bc-retry-2"
+      >
+        📸 Rifai foto
+      </button>
+
     </div>
 
-    <!-- stato: ricerca prodotto in corso -->
-    <div class="bc-state hidden" id="bc-state-searching">
+    <!-- RICERCA PRODOTTO -->
+
+    <div
+      class="bc-state hidden"
+      id="bc-state-searching"
+    >
+
       <div class="bc-searching">
+
         <div class="spinner"></div>
-        <p>Cerco il prodotto...</p>
+
+        <p>
+          Cerco il prodotto...
+        </p>
+
       </div>
 
     </div>
+
   </div>
+
 </div>
 
-<!-- MODAL: AGGIUNGI/MODIFICA ALIMENTO -->
+<!-- MODAL ALIMENTO -->
+
 <div class="modal-overlay hidden" id="modal-food">
+
   <div class="modal-sheet">
+
     <div class="modal-handle"></div>
-    <div class="modal-header"><h2 id="food-modal-title">Nuovo alimento</h2><button class="modal-close" data-close="modal-food">✕</button></div>
 
-    <input type="hidden" id="food-id">
-    <input type="hidden" id="food-prodotto-id">
-    <input type="hidden" id="food-codice-barre">
-    <input type="hidden" id="food-immagine-url">
+    <div class="modal-header">
 
-    <div class="product-found-banner hidden" id="product-found-banner">
-      <img id="pf-image" src="" alt="" class="hidden">
-      <div class="emoji-fallback" id="pf-emoji-fallback">📦</div>
+      <h2 id="food-modal-title">
+        Nuovo alimento
+      </h2>
+
+      <button
+        class="modal-close"
+        data-close="modal-food"
+      >
+        ✕
+      </button>
+
+    </div>
+
+    <input
+      type="hidden"
+      id="food-id"
+    >
+
+    <input
+      type="hidden"
+      id="food-prodotto-id"
+    >
+
+    <input
+      type="hidden"
+      id="food-codice-barre"
+    >
+
+    <input
+      type="hidden"
+      id="food-immagine-url"
+    >
+
+    <div
+      class="product-found-banner hidden"
+      id="product-found-banner"
+    >
+
+      <img
+        id="pf-image"
+        src=""
+        alt=""
+        class="hidden"
+      >
+
+      <div
+        class="emoji-fallback"
+        id="pf-emoji-fallback"
+      >
+        📦
+      </div>
+
       <div class="pf-info">
-        <p class="pf-label">Prodotto riconosciuto</p>
-        <p class="pf-name" id="pf-name">-</p>
-        <p class="pf-meta" id="pf-meta">-</p>
+
+        <p class="pf-label">
+          Prodotto riconosciuto
+        </p>
+
+        <p
+          class="pf-name"
+          id="pf-name"
+        >
+          -
+        </p>
+
+        <p
+          class="pf-meta"
+          id="pf-meta"
+        >
+          -
+        </p>
+
       </div>
+
     </div>
 
     <div class="field">
-      <label>Prodotto</label>
-      <input type="text" id="food-nome" placeholder="Es. Latte intero">
+
+      <label>
+        Prodotto
+      </label>
+
+      <input
+        type="text"
+        id="food-nome"
+        placeholder="Es. Latte intero"
+      >
+
     </div>
+
     <div class="field">
-      <label>Marca</label>
-      <input type="text" id="food-marca" placeholder="Es. Granarolo">
+
+      <label>
+        Marca
+      </label>
+
+      <input
+        type="text"
+        id="food-marca"
+        placeholder="Es. Granarolo"
+      >
+
     </div>
+
     <div class="field">
-      <label>Categoria</label>
+
+      <label>
+        Categoria
+      </label>
+
       <select id="food-categoria"></select>
+
     </div>
+
     <div class="grid-2">
+
       <div class="field">
-        <label>Quantità</label>
-        <input type="number" id="food-quantita" min="0" step="0.1" value="1">
+
+        <label>
+          Quantità
+        </label>
+
+        <input
+          type="number"
+          id="food-quantita"
+          min="0"
+          step="0.1"
+          value="1"
+        >
+
       </div>
+
       <div class="field">
-        <label>Unità</label>
+
+        <label>
+          Unità
+        </label>
+
         <select id="food-unita">
-          <option value="pezzi">pezzi</option>
-          <option value="confezioni">confezioni</option>
-          <option value="kg">kg</option>
-          <option value="g">g</option>
-          <option value="litri">litri</option>
-          <option value="ml">ml</option>
+
+          <option value="pezzi">
+            pezzi
+          </option>
+
+          <option value="confezioni">
+            confezioni
+          </option>
+
+          <option value="kg">
+            kg
+          </option>
+
+          <option value="g">
+            g
+          </option>
+
+          <option value="litri">
+            litri
+          </option>
+
+          <option value="ml">
+            ml
+          </option>
+
         </select>
+
       </div>
+
     </div>
+
     <div class="grid-2">
+
       <div class="field">
-        <label>Data di scadenza</label>
-        <input type="date" id="food-scadenza">
+
+        <label>
+          Data di scadenza
+        </label>
+
+        <input
+          type="date"
+          id="food-scadenza"
+        >
+
       </div>
+
       <div class="field">
-        <label>Posizione</label>
+
+        <label>
+          Posizione
+        </label>
+
         <select id="food-posizione">
-          <option value="Frigorifero">Frigorifero</option>
-          <option value="Freezer">Freezer</option>
-          <option value="Dispensa">Dispensa</option>
-          <option value="Altro">Altro</option>
+
+          <option value="Frigorifero">
+            Frigorifero
+          </option>
+
+          <option value="Freezer">
+            Freezer
+          </option>
+
+          <option value="Dispensa">
+            Dispensa
+          </option>
+
+          <option value="Altro">
+            Altro
+          </option>
+
         </select>
+
       </div>
+
     </div>
+
     <div class="field">
-      <label>Note (opzionale)</label>
-      <textarea id="food-note" rows="2" placeholder="Note aggiuntive…"></textarea>
+
+      <label>
+        Note (opzionale)
+      </label>
+
+      <textarea
+        id="food-note"
+        rows="2"
+        placeholder="Note aggiuntive…"
+      ></textarea>
+
     </div>
-    <div class="form-error" id="err-food"></div>
-    <button class="btn btn-primary" id="btn-save-food">Aggiungi alimento</button>
+
+    <div
+      class="form-error"
+      id="err-food"
+    ></div>
+
+    <button
+      class="btn btn-primary"
+      id="btn-save-food"
+    >
+      Aggiungi alimento
+    </button>
+
   </div>
+
 </div>
 
-<!-- MODAL: CONFERMA ELIMINAZIONE -->
-<div class="modal-overlay center hidden" id="modal-delete">
-  <div class="modal-sheet" style="border-radius:20px;">
+<!-- MODAL ELIMINAZIONE -->
+
+<div
+  class="modal-overlay center hidden"
+  id="modal-delete"
+>
+
+  <div
+    class="modal-sheet"
+    style="border-radius:20px;"
+  >
+
     <div class="confirm-body">
-      <span class="ic">🗑️</span>
-      <h2 style="margin:0 0 8px;font-size:17px;">Eliminare l'alimento?</h2>
-      <p>Sei sicuro di voler eliminare questo alimento? L'operazione non può essere annullata.</p>
+
+      <span class="ic">
+        🗑️
+      </span>
+
+      <h2
+        style="margin:0 0 8px;font-size:17px;"
+      >
+        Eliminare l'alimento?
+      </h2>
+
+      <p>
+        Sei sicuro di voler eliminare questo alimento?
+        L'operazione non può essere annullata.
+      </p>
+
     </div>
+
     <div class="grid-2">
-      <button class="btn btn-ghost" data-close="modal-delete">Annulla</button>
-      <button class="btn btn-danger" id="btn-confirm-delete">Elimina</button>
+
+      <button
+        class="btn btn-ghost"
+        data-close="modal-delete"
+      >
+        Annulla
+      </button>
+
+      <button
+        class="btn btn-danger"
+        id="btn-confirm-delete"
+      >
+        Elimina
+      </button>
+
     </div>
+
   </div>
+
 </div>
 
-<div class="toast-wrap" id="toast-wrap"></div>
+<div
+  class="toast-wrap"
+  id="toast-wrap"
+></div>
 
 <script>
 (function(){
+
   "use strict";
 
   /* ==========================================================
-     HELPER DI BASE (nessuna dipendenza esterna)
-     ========================================================== */
+     HELPER
+  ========================================================== */
+
   const $ = (id) => document.getElementById(id);
-  const show = (el) => el.classList.remove("hidden");
-  const hide = (el) => el.classList.add("hidden");
 
-  function openModal(id){ show($(id)); }
-  function closeModal(id){ hide($(id)); }
+  const show = (el) => {
+    if(el) el.classList.remove("hidden");
+  };
 
-  function toast(msg, type){
-    const wrap = $("toast-wrap");
-    const el = document.createElement("div");
-    el.className = "toast" + (type ? " " + type : "");
-    el.textContent = msg;
-    wrap.appendChild(el);
-    setTimeout(()=>{ el.style.opacity="0"; el.style.transition="opacity .3s"; setTimeout(()=>el.remove(), 300); }, 3200);
+  const hide = (el) => {
+    if(el) el.classList.add("hidden");
+  };
+
+  function openModal(id){
+    show($(id));
   }
 
-  function isOffline(){ return typeof navigator !== "undefined" && navigator.onLine === false; }
+  function closeModal(id){
+    hide($(id));
+  }
+
+  function toast(msg,type){
+
+    const wrap = $("toast-wrap");
+
+    const el = document.createElement("div");
+
+    el.className = "toast" + (type ? " " + type : "");
+
+    el.textContent = msg;
+
+    wrap.appendChild(el);
+
+    setTimeout(()=>{
+      el.style.opacity="0";
+      el.style.transition="opacity .3s";
+
+      setTimeout(()=>{
+        el.remove();
+      },300);
+
+    },3200);
+
+  }
+
+  function isOffline(){
+    return typeof navigator !== "undefined" &&
+           navigator.onLine === false;
+  }
 
   function friendlyError(context){
+
     if(isOffline()){
       return "Impossibile collegarsi al database. Controlla la connessione internet.";
     }
+
     const messages = {
-      save: "Impossibile salvare l'alimento. Riprova.",
-      delete: "Impossibile eliminare l'alimento. Riprova.",
-      load: "Impossibile caricare i dati. Riprova più tardi.",
-      generic: "Si è verificato un errore. Riprova più tardi."
+
+      save:
+        "Impossibile salvare l'alimento. Riprova.",
+
+      delete:
+        "Impossibile eliminare l'alimento. Riprova.",
+
+      load:
+        "Impossibile caricare i dati. Riprova più tardi.",
+
+      generic:
+        "Si è verificato un errore. Riprova più tardi."
+
     };
+
     return messages[context] || messages.generic;
+
   }
 
   /* ==========================================================
-     COLLEGAMENTO IMMEDIATO DELL'INTERFACCIA (UI-ONLY)
-     Questo blocco viene eseguito SUBITO, prima di toccare
-     Supabase o qualunque libreria esterna (ZXing compreso).
-     In questo modo i pulsanti dell'app (in particolare
-     "+ Aggiungi alimento") funzionano SEMPRE, anche se una
-     libreria esterna non si carica o va in errore.
-     ========================================================== */
+     UI LISTENER
+  ========================================================== */
+
   document.querySelectorAll("[data-close]").forEach(btn=>{
-    btn.addEventListener("click", ()=> closeModal(btn.dataset.close));
-  });
-  document.querySelectorAll(".modal-overlay").forEach(ov=>{
-    ov.addEventListener("click", (e)=>{ if(e.target === ov) closeModal(ov.id); });
+
+    btn.addEventListener("click",()=>{
+
+      closeModal(btn.dataset.close);
+
+    });
+
   });
 
-  $("btn-fab-add").addEventListener("click", ()=>{
+  document.querySelectorAll(".modal-overlay").forEach(ov=>{
+
+    ov.addEventListener("click",(e)=>{
+
+      if(e.target === ov){
+        closeModal(ov.id);
+      }
+
+    });
+
+  });
+
+  $("btn-fab-add").addEventListener("click",()=>{
+
     openModal("modal-choice");
+
   });
-  $("btn-manual-add").addEventListener("click", ()=>{
+
+  $("btn-manual-add").addEventListener("click",()=>{
+
     closeModal("modal-choice");
+
     openAddModal(null);
+
   });
-  $("btn-open-scan").addEventListener("click", ()=>{
+
+  $("btn-open-scan").addEventListener("click",()=>{
+
     closeModal("modal-choice");
+
     openScanModal();
+
   });
 
   /* ==========================================================
-     SUPABASE (inizializzazione protetta)
-     Se la libreria non è disponibile (CDN bloccato, rete
-     lenta, ecc.) l'app NON deve smettere di funzionare: usiamo
-     uno stub "offline" che restituisce errori gestiti invece
-     di bloccare l'intero script.
-     ========================================================== */
-  const SUPABASE_URL = "https://epeehnhcldjkyvmillog.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_LhRxq5JLOBI8SW6JalG_Cw_jaV_Vagr";
+     SUPABASE
+  ========================================================== */
+
+  const SUPABASE_URL =
+    "https://epeehnhcldjkyvmillog.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_LhRxq5JLOBI8SW6JalG_Cw_jaV_Vagr";
 
   function createOfflineSupabaseStub(){
+
     function chain(){
+
       const obj = {};
-      const chainMethods = ["select","order","eq","insert","update","delete","upsert","maybeSingle","single"];
-      chainMethods.forEach(m=>{ obj[m] = ()=> chain(); });
-      obj.then = (resolve)=> resolve({ data:null, error:{ message:"Servizio non disponibile. Verifica la connessione e riprova." } });
-      obj.catch = ()=> obj;
+
+      const chainMethods = [
+        "select",
+        "order",
+        "eq",
+        "insert",
+        "update",
+        "delete",
+        "upsert",
+        "maybeSingle",
+        "single"
+      ];
+
+      chainMethods.forEach(m=>{
+        obj[m] = ()=>chain();
+      });
+
+      obj.then = (resolve)=>
+        resolve({
+          data:null,
+          error:{
+            message:
+              "Servizio non disponibile. Verifica la connessione e riprova."
+          }
+        });
+
+      obj.catch = ()=>obj;
+
       return obj;
+
     }
+
     return {
-      from: ()=> chain(),
-      channel: ()=> ({ on: function(){ return this; }, subscribe: function(){ return this; } }),
-      removeChannel: ()=>{}
+
+      from:()=>chain(),
+
+      channel:()=>({
+
+        on:function(){
+          return this;
+        },
+
+        subscribe:function(){
+          return this;
+        }
+
+      }),
+
+      removeChannel:()=>{}
+
     };
+
   }
 
   let supabase;
+
   try{
-    if(!window.supabase || typeof window.supabase.createClient !== "function"){
-      throw new Error("Libreria Supabase (supabase-js) non caricata correttamente.");
+
+    if(
+      !window.supabase ||
+      typeof window.supabase.createClient !== "function"
+    ){
+      throw new Error(
+        "Libreria Supabase non caricata correttamente."
+      );
     }
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    supabase =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
   }catch(initErr){
-    console.error("Errore inizializzazione Supabase:", initErr);
-    supabase = createOfflineSupabaseStub();
+
+    console.error(
+      "Errore inizializzazione Supabase:",
+      initErr
+    );
+
+    supabase =
+      createOfflineSupabaseStub();
+
   }
 
-  // Inventario unico e condiviso: non esiste login né selezione famiglia.
-  // Nessun famiglia_id viene inviato dal frontend: la colonna, se presente
-  // sul database, è opzionale e resta gestita lato Supabase (default/NULL).
+  /* ==========================================================
+     INVENTARIO UNICO
+  ========================================================== */
 
   const CATEGORY_EMOJI = {
-    "Latticini":"🥛","Carne":"🥩","Pesce":"🐟","Frutta":"🍎","Verdura":"🥦",
-    "Pasta e Riso":"🍝","Pane e Prodotti da Forno":"🍞","Conserve":"🥫","Surgelati":"🧊",
-    "Bevande":"🥤","Dolci":"🍰","Snack":"🍿","Salse e Condimenti":"🧂","Salumi":"🍖",
-    "Uova":"🥚","Altro":"📦"
+
+    "Latticini":"🥛",
+    "Carne":"🥩",
+    "Pesce":"🐟",
+    "Frutta":"🍎",
+    "Verdura":"🥦",
+    "Pasta e Riso":"🍝",
+    "Pane e Prodotti da Forno":"🍞",
+    "Conserve":"🥫",
+    "Surgelati":"🧊",
+    "Bevande":"🥤",
+    "Dolci":"🍰",
+    "Snack":"🍿",
+    "Salse e Condimenti":"🧂",
+    "Salumi":"🍖",
+    "Uova":"🥚",
+    "Altro":"📦"
+
   };
 
   let categorie = [];
+
   let alimenti = [];
+
   let realtimeChannel = null;
+
   let currentFilter = "tutti";
+
   let currentCategoriaFilter = "";
+
   let currentPosizioneFilter = "";
+
   let searchQuery = "";
+
   let pendingDeleteId = null;
+
   let editingId = null;
 
-  /* ============== CATEGORIE ============== */
+  /* ==========================================================
+     CATEGORIE
+  ========================================================== */
+
   async function loadCategorie(){
+
     try{
-      const { data, error } = await supabase.from("categorie").select("*").order("nome");
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from("categorie")
+          .select("*")
+          .order("nome");
+
       if(error) throw error;
+
       categorie = data || [];
-      const selFood = $("food-categoria");
-      const selFilter = $("select-categoria-filter");
+
+      const selFood =
+        $("food-categoria");
+
+      const selFilter =
+        $("select-categoria-filter");
+
       selFood.innerHTML = "";
-      selFilter.innerHTML = '<option value="">Tutte le categorie</option>';
+
+      selFilter.innerHTML =
+        '<option value="">Tutte le categorie</option>';
+
       categorie.forEach(c=>{
-        const opt1 = document.createElement("option");
-        opt1.value = c.id; opt1.textContent = (CATEGORY_EMOJI[c.nome]||"📦") + " " + c.nome;
+
+        const opt1 =
+          document.createElement("option");
+
+        opt1.value = c.id;
+
+        opt1.textContent =
+          (CATEGORY_EMOJI[c.nome] || "📦") +
+          " " +
+          c.nome;
+
         selFood.appendChild(opt1);
-        const opt2 = document.createElement("option");
-        opt2.value = c.id; opt2.textContent = c.nome;
+
+        const opt2 =
+          document.createElement("option");
+
+        opt2.value = c.id;
+
+        opt2.textContent = c.nome;
+
         selFilter.appendChild(opt2);
+
       });
+
     }catch(err){
-      toast(friendlyError("load"), "error");
+
+      console.error(
+        "Errore caricamento categorie:",
+        err
+      );
+
+      toast(
+        err?.message ?
+          "Supabase: " + err.message :
+          friendlyError("load"),
+        "error"
+      );
+
     }
+
   }
 
   function categoriaNome(id){
-    const c = categorie.find(c=>String(c.id)===String(id));
-    return c ? c.nome : "Altro";
-  }
-  function categoriaEmoji(id){
-    return CATEGORY_EMOJI[categoriaNome(id)] || "📦";
+
+    const c =
+      categorie.find(
+        c=>String(c.id)===String(id)
+      );
+
+    return c ?
+      c.nome :
+      "Altro";
+
   }
 
-  /* ============== ALIMENTI: LOAD + REALTIME ============== */
+  function categoriaEmoji(id){
+
+    return CATEGORY_EMOJI[
+      categoriaNome(id)
+    ] || "📦";
+
+  }
+
+  /* ==========================================================
+     ALIMENTI
+  ========================================================== */
+
   async function loadAlimenti(){
+
     try{
-      const { data, error } = await supabase
-        .from("alimenti")
-        .select("*")
-        .order("data_scadenza", { ascending:true });
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from("alimenti")
+          .select("*")
+          .order(
+            "data_scadenza",
+            {
+              ascending:true
+            }
+          );
+
       if(error) throw error;
+
       alimenti = data || [];
+
       render();
+
     }catch(err){
-      toast(friendlyError("load"), "error");
+
+      console.error(
+        "Errore caricamento alimenti:",
+        err
+      );
+
+      toast(
+        err?.message ?
+          "Supabase: " + err.message :
+          friendlyError("load"),
+        "error"
+      );
+
     }
+
   }
 
   function subscribeRealtime(){
+
     try{
-      if(realtimeChannel) supabase.removeChannel(realtimeChannel);
-      realtimeChannel = supabase
-        .channel("alimenti-frigo-condiviso")
-        .on("postgres_changes",
-          { event:"*", schema:"public", table:"alimenti" },
-          (payload)=>{
-            if(payload.eventType === "INSERT"){
-              if(!alimenti.some(a=>a.id===payload.new.id)) alimenti.push(payload.new);
-            }else if(payload.eventType === "UPDATE"){
-              const idx = alimenti.findIndex(a=>a.id===payload.new.id);
-              if(idx>-1) alimenti[idx] = payload.new; else alimenti.push(payload.new);
-            }else if(payload.eventType === "DELETE"){
-              alimenti = alimenti.filter(a=>a.id !== payload.old.id);
+
+      if(realtimeChannel){
+
+        supabase.removeChannel(
+          realtimeChannel
+        );
+
+      }
+
+      realtimeChannel =
+        supabase
+          .channel(
+            "alimenti-frigo-condiviso"
+          )
+          .on(
+            "postgres_changes",
+            {
+              event:"*",
+              schema:"public",
+              table:"alimenti"
+            },
+            (payload)=>{
+
+              if(
+                payload.eventType === "INSERT"
+              ){
+
+                if(
+                  !alimenti.some(
+                    a=>a.id===payload.new.id
+                  )
+                ){
+
+                  alimenti.push(
+                    payload.new
+                  );
+
+                }
+
+              }
+
+              else if(
+                payload.eventType === "UPDATE"
+              ){
+
+                const idx =
+                  alimenti.findIndex(
+                    a=>a.id===payload.new.id
+                  );
+
+                if(idx>-1){
+
+                  alimenti[idx] =
+                    payload.new;
+
+                }else{
+
+                  alimenti.push(
+                    payload.new
+                  );
+
+                }
+
+              }
+
+              else if(
+                payload.eventType === "DELETE"
+              ){
+
+                alimenti =
+                  alimenti.filter(
+                    a=>a.id!==payload.old.id
+                  );
+
+              }
+
+              render();
+
             }
-            render();
-          }
-        )
-        .subscribe();
+          )
+          .subscribe();
+
     }catch(err){
-      console.error("Errore sottoscrizione realtime:", err);
+
+      console.error(
+        "Errore sottoscrizione realtime:",
+        err
+      );
+
     }
+
   }
 
-  /* ============== STATO SCADENZA ============== */
+  /* ==========================================================
+     STATO SCADENZA
+  ========================================================== */
+
   function getStatus(dataScadenzaStr){
-    const oggi = new Date(); oggi.setHours(0,0,0,0);
-    const scad = new Date(dataScadenzaStr + "T00:00:00");
-    const diffDays = Math.round((scad - oggi) / 86400000);
+
+    const oggi =
+      new Date();
+
+    oggi.setHours(
+      0,0,0,0
+    );
+
+    const scad =
+      new Date(
+        dataScadenzaStr +
+        "T00:00:00"
+      );
+
+    const diffDays =
+      Math.round(
+        (scad - oggi) /
+        86400000
+      );
+
     if(diffDays < 0){
-      return { level:"scaduto", badge:"SCADUTO", diffDays };
+
+      return {
+
+        level:"scaduto",
+
+        badge:"SCADUTO",
+
+        diffDays
+
+      };
+
     }
+
     if(diffDays <= 3){
-      const label = diffDays===0 ? "Scade oggi" : diffDays===1 ? "Scade domani" : `Scade tra ${diffDays} giorni`;
-      return { level:"urgente", badge:label, diffDays };
+
+      const label =
+        diffDays===0
+          ? "Scade oggi"
+          : diffDays===1
+          ? "Scade domani"
+          : `Scade tra ${diffDays} giorni`;
+
+      return {
+
+        level:"urgente",
+
+        badge:label,
+
+        diffDays
+
+      };
+
     }
+
     if(diffDays <= 7){
-      return { level:"attenzione", badge:`Scade tra ${diffDays} giorni`, diffDays };
+
+      return {
+
+        level:"attenzione",
+
+        badge:
+          `Scade tra ${diffDays} giorni`,
+
+        diffDays
+
+      };
+
     }
-    const [y,m,d] = dataScadenzaStr.split("-");
-    return { level:"ok", badge:`Scade il ${d}/${m}/${y}`, diffDays };
+
+    const [
+      y,
+      m,
+      d
+    ] =
+      dataScadenzaStr.split("-");
+
+    return {
+
+      level:"ok",
+
+      badge:
+        `Scade il ${d}/${m}/${y}`,
+
+      diffDays
+
+    };
+
   }
 
-  /* ============== RENDER ============== */
+  /* ==========================================================
+     FILTRI
+  ========================================================== */
+
   function passesFilters(a){
+
     if(searchQuery){
-      const q = searchQuery.toLowerCase();
-      const hay = `${a.nome||""} ${a.marca||""} ${a.codice_barre||""}`.toLowerCase();
-      if(!hay.includes(q)) return false;
+
+      const q =
+        searchQuery.toLowerCase();
+
+      const hay =
+        `${a.nome || ""} ${a.marca || ""} ${a.codice_barre || ""}`
+          .toLowerCase();
+
+      if(!hay.includes(q)){
+        return false;
+      }
+
     }
-    if(currentCategoriaFilter && String(a.categoria_id) !== String(currentCategoriaFilter)) return false;
-    if(currentPosizioneFilter && a.posizione !== currentPosizioneFilter) return false;
+
+    if(
+      currentCategoriaFilter &&
+      String(a.categoria_id) !==
+      String(currentCategoriaFilter)
+    ){
+
+      return false;
+
+    }
+
+    if(
+      currentPosizioneFilter &&
+      a.posizione !==
+      currentPosizioneFilter
+    ){
+
+      return false;
+
+    }
+
     if(currentFilter !== "tutti"){
-      const st = getStatus(a.data_scadenza).level;
-      if(currentFilter === "scaduto" && st !== "scaduto") return false;
-      if(currentFilter === "urgente" && st !== "urgente") return false;
-      if(currentFilter === "attenzione" && st !== "attenzione") return false;
-      if(currentFilter === "ok" && st !== "ok") return false;
+
+      const st =
+        getStatus(
+          a.data_scadenza
+        ).level;
+
+      if(
+        currentFilter === "scaduto" &&
+        st !== "scaduto"
+      ){
+        return false;
+      }
+
+      if(
+        currentFilter === "urgente" &&
+        st !== "urgente"
+      ){
+        return false;
+      }
+
+      if(
+        currentFilter === "attenzione" &&
+        st !== "attenzione"
+      ){
+        return false;
+      }
+
+      if(
+        currentFilter === "ok" &&
+        st !== "ok"
+      ){
+        return false;
+      }
+
     }
+
     return true;
+
   }
+
+  /* ==========================================================
+     RENDER
+  ========================================================== */
 
   function render(){
-    let scaduti=0, inScadenza=0, future=0;
+
+    let scaduti = 0;
+
+    let inScadenza = 0;
+
+    let future = 0;
+
     alimenti.forEach(a=>{
-      const st = getStatus(a.data_scadenza).level;
-      if(st==="scaduto") scaduti++;
-      else if(st==="urgente" || st==="attenzione") inScadenza++;
-      else future++;
+
+      const st =
+        getStatus(
+          a.data_scadenza
+        ).level;
+
+      if(st==="scaduto"){
+
+        scaduti++;
+
+      }
+
+      else if(
+        st==="urgente" ||
+        st==="attenzione"
+      ){
+
+        inScadenza++;
+
+      }
+
+      else{
+
+        future++;
+
+      }
+
     });
-    $("stat-totale").textContent = alimenti.length;
-    $("stat-scaduti").textContent = scaduti;
-    $("stat-scadenza").textContent = inScadenza;
-    $("stat-future").textContent = future;
 
-    const list = alimenti
-      .filter(passesFilters)
-      .slice()
-      .sort((a,b)=> new Date(a.data_scadenza) - new Date(b.data_scadenza));
+    $("stat-totale").textContent =
+      alimenti.length;
 
-    const container = $("lista-alimenti");
+    $("stat-scaduti").textContent =
+      scaduti;
+
+    $("stat-scadenza").textContent =
+      inScadenza;
+
+    $("stat-future").textContent =
+      future;
+
+    const list =
+      alimenti
+        .filter(passesFilters)
+        .slice()
+        .sort(
+          (a,b)=>
+            new Date(a.data_scadenza) -
+            new Date(b.data_scadenza)
+        );
+
+    const container =
+      $("lista-alimenti");
+
     container.innerHTML = "";
 
     if(list.length === 0){
-      show($("empty-state"));
+
+      show(
+        $("empty-state")
+      );
+
       return;
+
     }
-    hide($("empty-state"));
+
+    hide(
+      $("empty-state")
+    );
 
     list.forEach(a=>{
-      const status = getStatus(a.data_scadenza);
-      const card = document.createElement("div");
-      card.className = `food-card lvl-${status.level}`;
+
+      const status =
+        getStatus(
+          a.data_scadenza
+        );
+
+      const card =
+        document.createElement("div");
+
+      card.className =
+        `food-card lvl-${status.level}`;
+
       card.innerHTML = `
-        <div class="food-emoji">${categoriaEmoji(a.categoria_id)}</div>
+
+        <div class="food-emoji">
+          ${categoriaEmoji(a.categoria_id)}
+        </div>
+
         <div class="food-info">
-          <p class="food-name">${escapeHtml(a.nome||"")}</p>
-          <p class="food-brand">${escapeHtml(a.marca||"")}</p>
+
+          <p class="food-name">
+            ${escapeHtml(a.nome || "")}
+          </p>
+
+          <p class="food-brand">
+            ${escapeHtml(a.marca || "")}
+          </p>
+
           <div class="food-meta">
-            <span class="meta-tag">${formatQuantita(a.quantita)} ${escapeHtml(a.unita||"")}</span>
-            <span class="meta-tag">${escapeHtml(a.posizione||"")}</span>
+
+            <div
+              class="qty-control"
+              title="Modifica quantità"
+            >
+
+              <button
+                class="qty-minus"
+                type="button"
+                aria-label="Diminuisci quantità"
+              >
+                −
+              </button>
+
+              <span class="qty-value">
+                ${formatQuantita(a.quantita)}
+                ${escapeHtml(a.unita || "")}
+              </span>
+
+              <button
+                class="qty-plus"
+                type="button"
+                aria-label="Aumenta quantità"
+              >
+                +
+              </button>
+
+            </div>
+
+            <span class="meta-tag">
+              ${escapeHtml(a.posizione || "")}
+            </span>
+
           </div>
-          <span class="status-badge lvl-${status.level}">${status.badge}</span>
+
+          <span
+            class="status-badge lvl-${status.level}"
+          >
+            ${status.badge}
+          </span>
+
         </div>
+
         <div class="food-actions">
-          <button class="edit" title="Modifica">✏️</button>
-          <button class="del" title="Elimina">🗑️</button>
+
+          <button
+            class="edit"
+            title="Modifica"
+          >
+            ✏️
+          </button>
+
+          <button
+            class="del"
+            title="Elimina"
+          >
+            🗑️
+          </button>
+
         </div>
+
       `;
-      card.querySelector(".edit").addEventListener("click",(e)=>{ e.stopPropagation(); openEditModal(a); });
-      card.querySelector(".del").addEventListener("click",(e)=>{ e.stopPropagation(); openDeleteModal(a.id); });
-      card.addEventListener("click", ()=> openEditModal(a));
+
+      card
+        .querySelector(".edit")
+        .addEventListener(
+          "click",
+          (e)=>{
+            e.stopPropagation();
+            openEditModal(a);
+          }
+        );
+
+      card
+        .querySelector(".del")
+        .addEventListener(
+          "click",
+          (e)=>{
+            e.stopPropagation();
+            openDeleteModal(a.id);
+          }
+        );
+
+      card
+        .querySelector(".qty-minus")
+        .addEventListener(
+          "click",
+          (e)=>{
+            e.stopPropagation();
+            changeQuantity(a,-1);
+          }
+        );
+
+      card
+        .querySelector(".qty-plus")
+        .addEventListener(
+          "click",
+          (e)=>{
+            e.stopPropagation();
+            changeQuantity(a,1);
+          }
+        );
+
+      card.addEventListener(
+        "click",
+        (e)=>{
+
+          if(
+            e.target.closest(".qty-control") ||
+            e.target.closest(".food-actions")
+          ){
+            return;
+          }
+
+          openEditModal(a);
+
+        }
+      );
+
       container.appendChild(card);
+
     });
+
   }
 
   function formatQuantita(q){
-    if(q === null || q === undefined) return "";
-    const n = Number(q);
-    return Number.isInteger(n) ? String(n) : String(n);
+
+    if(
+      q === null ||
+      q === undefined
+    ){
+      return "";
+    }
+
+    const n =
+      Number(q);
+
+    return Number.isInteger(n)
+      ? String(n)
+      : String(n);
+
   }
+
   function escapeHtml(str){
-    const div = document.createElement("div");
-    div.textContent = str;
+
+    const div =
+      document.createElement("div");
+
+    div.textContent =
+      str;
+
     return div.innerHTML;
+
   }
 
-  /* ============== FILTRI UI ============== */
-  $("input-search").addEventListener("input", (e)=>{
-    searchQuery = e.target.value.trim();
-    render();
-  });
-  document.querySelectorAll("#filters-row .chip").forEach(chip=>{
-    chip.addEventListener("click", ()=>{
-      document.querySelectorAll("#filters-row .chip").forEach(c=>c.classList.remove("active"));
-      chip.classList.add("active");
-      currentFilter = chip.dataset.filter;
-      render();
-    });
-  });
-  $("select-categoria-filter").addEventListener("change",(e)=>{
-    currentCategoriaFilter = e.target.value; render();
-  });
-  $("select-posizione-filter").addEventListener("change",(e)=>{
-    currentPosizioneFilter = e.target.value; render();
-  });
+  /* ==========================================================
+     FILTRI UI
+  ========================================================== */
 
-  /* ============== AGGIUNTA / MODIFICA ALIMENTO ============== */
+  $("input-search")
+    .addEventListener(
+      "input",
+      (e)=>{
+
+        searchQuery =
+          e.target.value.trim();
+
+        render();
+
+      }
+    );
+
+  document
+    .querySelectorAll(
+      "#filters-row .chip"
+    )
+    .forEach(chip=>{
+
+      chip.addEventListener(
+        "click",
+        ()=>{
+
+          document
+            .querySelectorAll(
+              "#filters-row .chip"
+            )
+            .forEach(
+              c=>c.classList.remove("active")
+            );
+
+          chip.classList.add("active");
+
+          currentFilter =
+            chip.dataset.filter;
+
+          render();
+
+        }
+      );
+
+    });
+
+  $("select-categoria-filter")
+    .addEventListener(
+      "change",
+      (e)=>{
+
+        currentCategoriaFilter =
+          e.target.value;
+
+        render();
+
+      }
+    );
+
+  $("select-posizione-filter")
+    .addEventListener(
+      "change",
+      (e)=>{
+
+        currentPosizioneFilter =
+          e.target.value;
+
+        render();
+
+      }
+    );
+
+  /* ==========================================================
+     QUANTITÀ RAPIDA
+  ========================================================== */
+
+  async function changeQuantity(a,delta){
+
+    const current =
+      Number(a.quantita) || 0;
+
+    const next =
+      Math.max(
+        0,
+        Math.round(
+          (current + delta) * 100
+        ) / 100
+      );
+
+    if(next === current){
+      return;
+    }
+
+    a.quantita =
+      next;
+
+    render();
+
+    try{
+
+      if(isOffline()){
+        throw new Error("offline");
+      }
+
+      const {
+        error
+      } =
+        await supabase
+          .from("alimenti")
+          .update({
+            quantita:next,
+            updated_at:
+              new Date().toISOString()
+          })
+          .eq("id",a.id);
+
+      if(error){
+        throw error;
+      }
+
+    }catch(err){
+
+      console.error(
+        "Errore aggiornamento quantità:",
+        err
+      );
+
+      a.quantita =
+        current;
+
+      render();
+
+      toast(
+        "Impossibile aggiornare la quantità.",
+        "error"
+      );
+
+    }
+
+  }
+
+  /* ==========================================================
+     AGGIUNTA / MODIFICA
+  ========================================================== */
+
   function resetFoodForm(){
+
     $("food-id").value = "";
+
     $("food-prodotto-id").value = "";
+
     $("food-codice-barre").value = "";
+
     $("food-immagine-url").value = "";
+
     $("food-nome").value = "";
+
     $("food-marca").value = "";
-    $("food-categoria").value = categorie.length ? categorie[0].id : "";
-    $("food-quantita").value = "1";
-    $("food-unita").value = "pezzi";
-    $("food-scadenza").value = "";
-    $("food-posizione").value = "Frigorifero";
-    $("food-note").value = "";
-    $("err-food").classList.remove("show");
-    hide($("product-found-banner"));
+
+    $("food-categoria").value =
+      categorie.length
+        ? categorie[0].id
+        : "";
+
+    $("food-quantita").value =
+      "1";
+
+    $("food-unita").value =
+      "pezzi";
+
+    $("food-scadenza").value =
+      "";
+
+    $("food-posizione").value =
+      "Frigorifero";
+
+    $("food-note").value =
+      "";
+
+    $("err-food")
+      .classList
+      .remove("show");
+
+    hide(
+      $("product-found-banner")
+    );
+
   }
 
   function showProductFoundBanner(info){
-    // info: { nome, marca, categoria_id, immagine_url }
-    if(!info || !info.nome){ hide($("product-found-banner")); return; }
-    $("pf-name").textContent = info.nome;
-    const metaParts = [];
-    if(info.marca) metaParts.push(info.marca);
-    metaParts.push(categoriaNome(info.categoria_id));
-    $("pf-meta").textContent = metaParts.join(" · ");
-    if(info.immagine_url){
-      $("pf-image").src = info.immagine_url;
-      show($("pf-image"));
-      hide($("pf-emoji-fallback"));
-    }else{
-      hide($("pf-image"));
-      $("pf-emoji-fallback").textContent = categoriaEmoji(info.categoria_id);
-      show($("pf-emoji-fallback"));
+
+    if(
+      !info ||
+      !info.nome
+    ){
+
+      hide(
+        $("product-found-banner")
+      );
+
+      return;
+
     }
-    show($("product-found-banner"));
+
+    $("pf-name").textContent =
+      info.nome;
+
+    const metaParts = [];
+
+    if(info.marca){
+      metaParts.push(
+        info.marca
+      );
+    }
+
+    metaParts.push(
+      categoriaNome(
+        info.categoria_id
+      )
+    );
+
+    $("pf-meta").textContent =
+      metaParts.join(" · ");
+
+    if(info.immagine_url){
+
+      $("pf-image").src =
+        info.immagine_url;
+
+      show(
+        $("pf-image")
+      );
+
+      hide(
+        $("pf-emoji-fallback")
+      );
+
+    }else{
+
+      hide(
+        $("pf-image")
+      );
+
+      $("pf-emoji-fallback")
+        .textContent =
+          categoriaEmoji(
+            info.categoria_id
+          );
+
+      show(
+        $("pf-emoji-fallback"
+      );
+
+    }
+
+    show(
+      $("product-found-banner")
+    );
+
   }
 
   function openAddModal(prefill){
-    editingId = null;
+
+    editingId =
+      null;
+
     resetFoodForm();
+
     if(prefill){
-      $("food-prodotto-id").value = prefill.prodotto_id || "";
-      $("food-codice-barre").value = prefill.codice_barre || "";
-      $("food-immagine-url").value = prefill.immagine_url || "";
-      $("food-nome").value = prefill.nome || "";
-      $("food-marca").value = prefill.marca || "";
-      if(prefill.categoria_id) $("food-categoria").value = prefill.categoria_id;
-      if(prefill.nome){
-        showProductFoundBanner(prefill);
+
+      $("food-prodotto-id").value =
+        prefill.prodotto_id || "";
+
+      $("food-codice-barre").value =
+        prefill.codice_barre || "";
+
+      $("food-immagine-url").value =
+        prefill.immagine_url || "";
+
+      $("food-nome").value =
+        prefill.nome || "";
+
+      $("food-marca").value =
+        prefill.marca || "";
+
+      if(prefill.categoria_id){
+
+        $("food-categoria").value =
+          prefill.categoria_id;
+
       }
+
+      if(prefill.nome){
+
+        showProductFoundBanner(
+          prefill
+        );
+
+      }
+
     }
-    $("food-modal-title").textContent = "Nuovo alimento";
-    $("btn-save-food").textContent = "Aggiungi alimento";
-    openModal("modal-food");
+
+    $("food-modal-title").textContent =
+      "Nuovo alimento";
+
+    $("btn-save-food").textContent =
+      "Aggiungi alimento";
+
+    openModal(
+      "modal-food"
+    );
+
   }
 
   function openEditModal(a){
-    editingId = a.id;
-    $("food-id").value = a.id;
-    $("food-prodotto-id").value = a.prodotto_id || "";
-    $("food-codice-barre").value = a.codice_barre || "";
-    $("food-immagine-url").value = "";
-    $("food-nome").value = a.nome || "";
-    $("food-marca").value = a.marca || "";
-    $("food-categoria").value = a.categoria_id || (categorie[0] && categorie[0].id) || "";
-    $("food-quantita").value = a.quantita ?? 1;
-    $("food-unita").value = a.unita || "pezzi";
-    $("food-scadenza").value = a.data_scadenza || "";
-    $("food-posizione").value = a.posizione || "Frigorifero";
-    $("food-note").value = a.note || "";
-    $("err-food").classList.remove("show");
-    hide($("product-found-banner"));
-    $("food-modal-title").textContent = "Modifica alimento";
-    $("btn-save-food").textContent = "Salva modifiche";
-    openModal("modal-food");
+
+    editingId =
+      a.id;
+
+    $("food-id").value =
+      a.id;
+
+    $("food-prodotto-id").value =
+      a.prodotto_id || "";
+
+    $("food-codice-barre").value =
+      a.codice_barre || "";
+
+    $("food-immagine-url").value =
+      "";
+
+    $("food-nome").value =
+      a.nome || "";
+
+    $("food-marca").value =
+      a.marca || "";
+
+    $("food-categoria").value =
+      a.categoria_id ||
+      (
+        categorie[0] &&
+        categorie[0].id
+      ) ||
+      "";
+
+    $("food-quantita").value =
+      a.quantita ?? 1;
+
+    $("food-unita").value =
+      a.unita || "pezzi";
+
+    $("food-scadenza").value =
+      a.data_scadenza || "";
+
+    $("food-posizione").value =
+      a.posizione ||
+      "Frigorifero";
+
+    $("food-note").value =
+      a.note || "";
+
+    $("err-food")
+      .classList
+      .remove("show");
+
+    hide(
+      $("product-found-banner")
+    );
+
+    $("food-modal-title").textContent =
+      "Modifica alimento";
+
+    $("btn-save-food").textContent =
+      "Salva modifiche";
+
+    openModal(
+      "modal-food"
+    );
+
   }
 
-  $("btn-save-food").addEventListener("click", async ()=>{
-    const errEl = $("err-food");
-    errEl.classList.remove("show");
-    const nome = $("food-nome").value.trim();
-    const scadenza = $("food-scadenza").value;
-    if(!nome){ errEl.textContent = "Inserisci il nome del prodotto."; errEl.classList.add("show"); return; }
-    if(!scadenza){ errEl.textContent = "Inserisci la data di scadenza."; errEl.classList.add("show"); return; }
+  $("btn-save-food")
+    .addEventListener(
+      "click",
+      async ()=>{
 
-    const payload = {
-      prodotto_id: $("food-prodotto-id").value || null,
-      codice_barre: $("food-codice-barre").value || null,
-      nome,
-      marca: $("food-marca").value.trim() || null,
-      categoria_id: $("food-categoria").value || null,
-      quantita: parseFloat($("food-quantita").value) || 1,
-      unita: $("food-unita").value,
-      data_scadenza: scadenza,
-      posizione: $("food-posizione").value,
-      note: $("food-note").value.trim() || null,
-      updated_at: new Date().toISOString()
-    };
+        const errEl =
+          $("err-food");
 
-    const btn = $("btn-save-food");
-    btn.disabled = true;
-    const originalLabel = btn.textContent;
-    btn.textContent = "Salvataggio…";
+        errEl
+          .classList
+          .remove("show");
 
-    try{
-      if(isOffline()) throw new Error("offline");
-      if(editingId){
-        const { error } = await supabase.from("alimenti").update(payload).eq("id", editingId);
-        if(error) throw error;
-        toast("Alimento aggiornato", "success");
-      }else{
-        const { error } = await supabase.from("alimenti").insert(payload);
-        if(error) throw error;
-        toast("Alimento aggiunto", "success");
+        const nome =
+          $("food-nome")
+            .value
+            .trim();
+
+        const scadenza =
+          $("food-scadenza")
+            .value;
+
+        if(!nome){
+
+          errEl.textContent =
+            "Inserisci il nome del prodotto.";
+
+          errEl.classList.add(
+            "show"
+          );
+
+          return;
+
+        }
+
+        if(!scadenza){
+
+          errEl.textContent =
+            "Inserisci la data di scadenza.";
+
+          errEl.classList.add(
+            "show"
+          );
+
+          return;
+
+        }
+
+        const payload = {
+
+          prodotto_id:
+            $("food-prodotto-id")
+              .value ||
+            null,
+
+          codice_barre:
+            $("food-codice-barre")
+              .value ||
+            null,
+
+          nome,
+
+          marca:
+            $("food-marca")
+              .value
+              .trim() ||
+            null,
+
+          categoria_id:
+            $("food-categoria")
+              .value ||
+            null,
+
+          quantita:
+            parseFloat(
+              $("food-quantita")
+                .value
+            ) || 1,
+
+          unita:
+            $("food-unita")
+              .value,
+
+          data_scadenza:
+            scadenza,
+
+          posizione:
+            $("food-posizione")
+              .value,
+
+          note:
+            $("food-note")
+              .value
+              .trim() ||
+            null,
+
+          updated_at:
+            new Date().toISOString()
+
+        };
+
+        const btn =
+          $("btn-save-food");
+
+        btn.disabled =
+          true;
+
+        const originalLabel =
+          btn.textContent;
+
+        btn.textContent =
+          "Salvataggio…";
+
+        try{
+
+          if(isOffline()){
+            throw new Error("offline");
+          }
+
+          if(editingId){
+
+            const {
+              error
+            } =
+              await supabase
+                .from("alimenti")
+                .update(payload)
+                .eq(
+                  "id",
+                  editingId
+                );
+
+            if(error){
+              throw error;
+            }
+
+            toast(
+              "Alimento aggiornato",
+              "success"
+            );
+
+          }else{
+
+            const {
+              error
+            } =
+              await supabase
+                .from("alimenti")
+                .insert(
+                  payload
+                );
+
+            if(error){
+              throw error;
+            }
+
+            toast(
+              "Alimento aggiunto",
+              "success"
+            );
+
+          }
+
+          closeModal(
+            "modal-food"
+          );
+
+          loadAlimenti();
+
+        }catch(err){
+
+          console.error(
+            "Errore salvataggio alimento:",
+            err
+          );
+
+          console.error(
+            "Dettagli Supabase:",
+            {
+              message:err?.message,
+              details:err?.details,
+              hint:err?.hint,
+              code:err?.code
+            }
+          );
+
+          errEl.textContent =
+            err?.message &&
+            err.message !== "offline"
+              ? "Supabase: " +
+                err.message
+              : friendlyError(
+                  "save"
+                );
+
+          errEl.classList.add(
+            "show"
+          );
+
+        }finally{
+
+          btn.disabled =
+            false;
+
+          btn.textContent =
+            originalLabel;
+
+        }
+
       }
-      closeModal("modal-food");
-      loadAlimenti();
-    }catch(err){
-      errEl.textContent = friendlyError("save");
-      errEl.classList.add("show");
-    }finally{
-      btn.disabled = false;
-      btn.textContent = originalLabel;
-    }
-  });
+    );
 
-  /* ============== ELIMINAZIONE ============== */
+  /* ==========================================================
+     ELIMINAZIONE
+  ========================================================== */
+
   function openDeleteModal(id){
-    pendingDeleteId = id;
-    openModal("modal-delete");
+
+    pendingDeleteId =
+      id;
+
+    openModal(
+      "modal-delete"
+    );
+
   }
-  $("btn-confirm-delete").addEventListener("click", async ()=>{
-    if(!pendingDeleteId) return;
-    const btn = $("btn-confirm-delete");
-    btn.disabled = true;
-    try{
-      if(isOffline()) throw new Error("offline");
-      const { error } = await supabase.from("alimenti").delete().eq("id", pendingDeleteId);
-      if(error) throw error;
-      toast("Alimento eliminato", "success");
-      closeModal("modal-delete");
-      loadAlimenti();
-    }catch(err){
-      toast(friendlyError("delete"), "error");
-    }finally{
-      btn.disabled = false;
-      pendingDeleteId = null;
-    }
-  });
 
-  /* ============== FOTOCAMERA INTEGRATA + ANALISI FOTO SCATTATA (getUserMedia + ZXing) ==============
-     Nulla in questa sezione viene eseguito al caricamento della pagina:
-     la fotocamera parte SOLO quando l'utente preme "📷 Fotografa codice a barre".
-     Un eventuale problema con la libreria ZXing (mancato caricamento, CDN
-     bloccato, ecc.) resta isolato qui e non influenza il resto dell'app. */
-  const ZXING_FORMAT_LABELS = (function(){
-    try{
-      if(typeof ZXing === "undefined") return {};
-      const BF = ZXing.BarcodeFormat;
-      const map = {};
-      map[BF.EAN_13] = "EAN-13";
-      map[BF.EAN_8] = "EAN-8";
-      map[BF.UPC_A] = "UPC-A";
-      map[BF.UPC_E] = "UPC-E";
-      map[BF.CODE_128] = "Code 128";
-      map[BF.CODE_39] = "Code 39";
-      return map;
-    }catch(e){
-      console.error("Errore inizializzazione formati ZXing:", e);
-      return {};
-    }
-  })();
+  $("btn-confirm-delete")
+    .addEventListener(
+      "click",
+      async ()=>{
 
-  let zxingReader = null;          // istanza condivisa del lettore ZXing (usata SOLO per analizzare la foto scattata)
-  let activeStream = null;         // stream della fotocamera attualmente in anteprima nella pagina
-  let videoInputDevices = [];      // elenco fotocamere disponibili
-  let currentDeviceIndex = -1;     // indice fotocamera attualmente in uso
-  let scanModalOpen = false;
+        if(!pendingDeleteId){
+          return;
+        }
+
+        const btn =
+          $("btn-confirm-delete");
+
+        btn.disabled =
+          true;
+
+        try{
+
+          if(isOffline()){
+            throw new Error("offline");
+          }
+
+          const {
+            error
+          } =
+            await supabase
+              .from("alimenti")
+              .delete()
+              .eq(
+                "id",
+                pendingDeleteId
+              );
+
+          if(error){
+            throw error;
+          }
+
+          toast(
+            "Alimento eliminato",
+            "success"
+          );
+
+          closeModal(
+            "modal-delete"
+          );
+
+          loadAlimenti();
+
+        }catch(err){
+
+          console.error(
+            "Errore eliminazione:",
+            err
+          );
+
+          toast(
+            friendlyError("delete"),
+            "error"
+          );
+
+        }finally{
+
+          btn.disabled =
+            false;
+
+          pendingDeleteId =
+            null;
+
+        }
+
+      }
+    );
+
+  /* ==========================================================
+     BARCODE
+     ========================================================== */
+
+  const ZXING_FORMAT_LABELS =
+    (function(){
+
+      try{
+
+        if(
+          typeof ZXing ===
+          "undefined"
+        ){
+          return {};
+        }
+
+        const BF =
+          ZXing.BarcodeFormat;
+
+        const map = {};
+
+        map[BF.EAN_13] =
+          "EAN-13";
+
+        map[BF.EAN_8] =
+          "EAN-8";
+
+        map[BF.UPC_A] =
+          "UPC-A";
+
+        map[BF.UPC_E] =
+          "UPC-E";
+
+        map[BF.CODE_128] =
+          "Code 128";
+
+        map[BF.CODE_39] =
+          "Code 39";
+
+        return map;
+
+      }catch(e){
+
+        console.error(
+          "Errore inizializzazione formati ZXing:",
+          e
+        );
+
+        return {};
+
+      }
+
+    })();
+
+  let zxingReader =
+    null;
+
+  let activeStream =
+    null;
+
+  let videoInputDevices =
+    [];
+
+  let currentDeviceIndex =
+    -1;
+
+  let scanModalOpen =
+    false;
 
   function getZxingReader(){
-    if(typeof ZXing === "undefined"){
-      throw new Error("Libreria ZXing non disponibile.");
+
+    if(
+      typeof ZXing ===
+      "undefined"
+    ){
+
+      throw new Error(
+        "Libreria ZXing non disponibile."
+      );
+
     }
+
     if(!zxingReader){
-      const hints = new Map();
-      hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-        ZXing.BarcodeFormat.EAN_13,
-        ZXing.BarcodeFormat.EAN_8,
-        ZXing.BarcodeFormat.UPC_A,
-        ZXing.BarcodeFormat.UPC_E,
-        ZXing.BarcodeFormat.CODE_128,
-        ZXing.BarcodeFormat.CODE_39
-      ]);
-      hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-      zxingReader = new ZXing.BrowserMultiFormatReader(hints);
+
+      const hints =
+        new Map();
+
+      hints.set(
+        ZXing.DecodeHintType.POSSIBLE_FORMATS,
+        [
+          ZXing.BarcodeFormat.EAN_13,
+          ZXing.BarcodeFormat.EAN_8,
+          ZXing.BarcodeFormat.UPC_A,
+          ZXing.BarcodeFormat.UPC_E,
+          ZXing.BarcodeFormat.CODE_128,
+          ZXing.BarcodeFormat.CODE_39
+        ]
+      );
+
+      hints.set(
+        ZXing.DecodeHintType.TRY_HARDER,
+        true
+      );
+
+      zxingReader =
+        new ZXing.BrowserMultiFormatReader(
+          hints
+        );
+
     }
+
     return zxingReader;
+
   }
 
   function scanShowLiveState(){
-    ["scan-state-live","scan-state-denied","scan-state-unavailable"].forEach(id=>{
-      if(id === "scan-state-live") show($(id)); else hide($(id));
+
+    [
+      "scan-state-live",
+      "scan-state-denied",
+      "scan-state-unavailable"
+    ].forEach(id=>{
+
+      if(id === "scan-state-live"){
+        show($(id));
+      }else{
+        hide($(id));
+      }
+
     });
-    hide($("scan-bottom-sheet"));
+
+    hide(
+      $("scan-bottom-sheet")
+    );
+
   }
+
   function scanShowDenied(){
-    ["scan-state-live","scan-state-denied","scan-state-unavailable"].forEach(id=>{
-      if(id === "scan-state-denied") show($(id)); else hide($(id));
+
+    [
+      "scan-state-live",
+      "scan-state-denied",
+      "scan-state-unavailable"
+    ].forEach(id=>{
+
+      if(id === "scan-state-denied"){
+        show($(id));
+      }else{
+        hide($(id));
+      }
+
     });
-    hide($("scan-bottom-sheet"));
+
+    hide(
+      $("scan-bottom-sheet")
+    );
+
   }
+
   function scanShowUnavailable(){
-    ["scan-state-live","scan-state-denied","scan-state-unavailable"].forEach(id=>{
-      if(id === "scan-state-unavailable") show($(id)); else hide($(id));
+
+    [
+      "scan-state-live",
+      "scan-state-denied",
+      "scan-state-unavailable"
+    ].forEach(id=>{
+
+      if(
+        id ===
+        "scan-state-unavailable"
+      ){
+        show($(id));
+      }else{
+        hide($(id));
+      }
+
     });
-    hide($("scan-bottom-sheet"));
+
+    hide(
+      $("scan-bottom-sheet")
+    );
+
   }
 
   function bcShowSheetState(stateId){
-    show($("scan-bottom-sheet"));
-    ["bc-state-analyzing","bc-state-confirm","bc-state-failed","bc-state-searching"].forEach(id=>{
-      if(id === stateId) show($(id)); else hide($(id));
+
+    show(
+      $("scan-bottom-sheet")
+    );
+
+    [
+      "bc-state-analyzing",
+      "bc-state-confirm",
+      "bc-state-failed",
+      "bc-state-searching"
+    ].forEach(id=>{
+
+      if(id === stateId){
+
+        show($(id));
+
+      }else{
+
+        hide($(id));
+
+      }
+
     });
+
   }
 
-  // Elenca le fotocamere disponibili (le label sono visibili solo dopo che il permesso è stato concesso)
   async function refreshVideoInputDevices(){
+
     try{
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      videoInputDevices = devices.filter(d=>d.kind === "videoinput");
+
+      const devices =
+        await navigator
+          .mediaDevices
+          .enumerateDevices();
+
+      videoInputDevices =
+        devices.filter(
+          d=>d.kind ===
+          "videoinput"
+        );
+
     }catch(e){
+
       videoInputDevices = [];
+
     }
-    if(videoInputDevices.length > 1){
-      show($("btn-scan-switch-camera"));
+
+    if(
+      videoInputDevices.length > 1
+    ){
+
+      show(
+        $("btn-scan-switch-camera")
+      );
+
     }else{
-      hide($("btn-scan-switch-camera"));
+
+      hide(
+        $("btn-scan-switch-camera")
+      );
+
     }
+
   }
 
   function stopCameraStream(){
+
     if(activeStream){
-      activeStream.getTracks().forEach(t=>{ try{ t.stop(); }catch(e){} });
-      activeStream = null;
+
+      activeStream
+        .getTracks()
+        .forEach(
+          t=>{
+            try{
+              t.stop();
+            }catch(e){}
+          }
+        );
+
+      activeStream =
+        null;
+
     }
-    const video = $("scan-video");
-    if(video) video.srcObject = null;
+
+    const video =
+      $("scan-video");
+
+    if(video){
+
+      video.srcObject =
+        null;
+
+    }
+
   }
 
-  // Avvia SOLO l'anteprima della fotocamera dentro la pagina (getUserMedia + <video>).
-  // Non viene effettuata alcuna analisi automatica del video: il riconoscimento
-  // del barcode parte esclusivamente quando l'utente preme "Scatta foto".
-  async function startCameraPreview(deviceId){
+  async function startCameraPreview(
+    deviceId
+  ){
+
     scanShowLiveState();
+
     stopCameraStream();
 
-    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    if(
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia
+    ){
+
       scanShowUnavailable();
+
       return;
+
     }
 
-    const constraints = deviceId
-      ? { video: { deviceId: { exact: deviceId } }, audio: false }
-      : { video: { facingMode: { ideal: "environment" } }, audio: false };
+    const constraints =
+      deviceId
+        ? {
+            video:{
+              deviceId:{
+                exact:deviceId
+              }
+            },
+            audio:false
+          }
+        : {
+            video:{
+              facingMode:{
+                ideal:"environment"
+              }
+            },
+            audio:false
+          };
 
     try{
-      activeStream = await navigator.mediaDevices.getUserMedia(constraints);
-      const video = $("scan-video");
-      video.srcObject = activeStream;
-      await video.play().catch(()=>{});
+
+      activeStream =
+        await navigator
+          .mediaDevices
+          .getUserMedia(
+            constraints
+          );
+
+      const video =
+        $("scan-video");
+
+      video.srcObject =
+        activeStream;
+
+      await video
+        .play()
+        .catch(()=>{});
 
       await refreshVideoInputDevices();
-      if(currentDeviceIndex === -1 && videoInputDevices.length){
-        const track = activeStream.getVideoTracks()[0];
-        const activeId = track && track.getSettings ? track.getSettings().deviceId : null;
-        const idx = activeId ? videoInputDevices.findIndex(d=>d.deviceId === activeId) : -1;
-        currentDeviceIndex = idx > -1 ? idx : 0;
+
+      if(
+        currentDeviceIndex === -1 &&
+        videoInputDevices.length
+      ){
+
+        const track =
+          activeStream
+            .getVideoTracks()[0];
+
+        const activeId =
+          track &&
+          track.getSettings
+            ? track
+                .getSettings()
+                .deviceId
+            : null;
+
+        const idx =
+          activeId
+            ? videoInputDevices.findIndex(
+                d=>d.deviceId === activeId
+              )
+            : -1;
+
+        currentDeviceIndex =
+          idx > -1
+            ? idx
+            : 0;
+
       }
+
     }catch(err){
-      if(err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError" || err.name === "SecurityError")){
+
+      console.error(
+        "Errore fotocamera:",
+        err
+      );
+
+      if(
+        err &&
+        (
+          err.name ===
+            "NotAllowedError" ||
+          err.name ===
+            "PermissionDeniedError" ||
+          err.name ===
+            "SecurityError"
+        )
+      ){
+
         scanShowDenied();
+
       }else{
+
         scanShowUnavailable();
+
       }
+
     }
+
   }
 
-  // Cattura un singolo frame dal video live in un <canvas>
   function captureFrameToCanvas(){
-    const video = $("scan-video");
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth || 1280;
-    canvas.height = video.videoHeight || 720;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const video =
+      $("scan-video");
+
+    const canvas =
+      document.createElement(
+        "canvas"
+      );
+
+    canvas.width =
+      video.videoWidth ||
+      1280;
+
+    canvas.height =
+      video.videoHeight ||
+      720;
+
+    const ctx =
+      canvas.getContext(
+        "2d"
+      );
+
+    ctx.drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
     return canvas;
+
   }
 
-  function canvasToImageElement(canvas){
-    return new Promise((resolve, reject)=>{
-      const img = new Image();
-      img.onload = ()=> resolve(img);
-      img.onerror = reject;
-      img.src = canvas.toDataURL("image/png");
-    });
-  }
+  function canvasToImageElement(
+    canvas
+  ){
 
-  // Analizza la FOTO scattata (non il flusso video) con ZXing: vero riconoscimento
-  // barcode da immagine, non OCR.
-  async function decodeBarcodeFromCanvas(canvas){
-    try{
-      const reader = getZxingReader();
-      const img = await canvasToImageElement(canvas);
-      try{
-        return await reader.decodeFromImage(img);
-      }catch(e){
-        return null; // nessun barcode trovato in questa foto
+    return new Promise(
+      (resolve,reject)=>{
+
+        const img =
+          new Image();
+
+        img.onload =
+          ()=>{
+            resolve(img);
+          };
+
+        img.onerror =
+          reject;
+
+        img.src =
+          canvas.toDataURL(
+            "image/png",
+            1
+          );
+
       }
-    }catch(e){
-      console.error("Errore lettore barcode:", e);
-      return null;
+    );
+
+  }
+
+  function makeBarcodeCanvasVariants(
+    source
+  ){
+
+    const variants =
+      [source];
+
+    /* SCALA DI GRIGI */
+
+    const gray =
+      document.createElement(
+        "canvas"
+      );
+
+    gray.width =
+      source.width;
+
+    gray.height =
+      source.height;
+
+    const gctx =
+      gray.getContext(
+        "2d",
+        {
+          willReadFrequently:true
+        }
+      );
+
+    gctx.drawImage(
+      source,
+      0,
+      0
+    );
+
+    const imageData =
+      gctx.getImageData(
+        0,
+        0,
+        gray.width,
+        gray.height
+      );
+
+    const px =
+      imageData.data;
+
+    for(
+      let i=0;
+      i<px.length;
+      i+=4
+    ){
+
+      const y =
+        Math.round(
+          0.299*px[i] +
+          0.587*px[i+1] +
+          0.114*px[i+2]
+        );
+
+      px[i] =
+        y;
+
+      px[i+1] =
+        y;
+
+      px[i+2] =
+        y;
+
     }
+
+    gctx.putImageData(
+      imageData,
+      0,
+      0
+    );
+
+    variants.push(
+      gray
+    );
+
+    /* CONTRASTO */
+
+    const contrast =
+      document.createElement(
+        "canvas"
+      );
+
+    contrast.width =
+      source.width;
+
+    contrast.height =
+      source.height;
+
+    const cctx =
+      contrast.getContext(
+        "2d",
+        {
+          willReadFrequently:true
+        }
+      );
+
+    cctx.drawImage(
+      source,
+      0,
+      0
+    );
+
+    const cdata =
+      cctx.getImageData(
+        0,
+        0,
+        contrast.width,
+        contrast.height
+      );
+
+    const cp =
+      cdata.data;
+
+    const factor =
+      (255+70) /
+      (255-70);
+
+    for(
+      let i=0;
+      i<cp.length;
+      i+=4
+    ){
+
+      cp[i] =
+        Math.max(
+          0,
+          Math.min(
+            255,
+            factor*(cp[i]-128)+128
+          )
+        );
+
+      cp[i+1] =
+        Math.max(
+          0,
+          Math.min(
+            255,
+            factor*(cp[i+1]-128)+128
+          )
+        );
+
+      cp[i+2] =
+        Math.max(
+          0,
+          Math.min(
+            255,
+            factor*(cp[i+2]-128)+128
+          )
+        );
+
+    }
+
+    cctx.putImageData(
+      cdata,
+      0,
+      0
+    );
+
+    variants.push(
+      contrast
+    );
+
+    /* RITAGLIO CENTRALE */
+
+    const cropW =
+      Math.floor(
+        source.width * 0.88
+      );
+
+    const cropH =
+      Math.floor(
+        source.height * 0.45
+      );
+
+    const crop =
+      document.createElement(
+        "canvas"
+      );
+
+    crop.width =
+      cropW;
+
+    crop.height =
+      cropH;
+
+    crop
+      .getContext("2d")
+      .drawImage(
+        source,
+        Math.floor(
+          (source.width-cropW)/2
+        ),
+        Math.floor(
+          (source.height-cropH)/2
+        ),
+        cropW,
+        cropH,
+        0,
+        0,
+        cropW,
+        cropH
+      );
+
+    variants.push(
+      crop
+    );
+
+    return variants;
+
+  }
+
+  async function decodeBarcodeFromCanvas(
+    canvas
+  ){
+
+    try{
+
+      const reader =
+        getZxingReader();
+
+      const variants =
+        makeBarcodeCanvasVariants(
+          canvas
+        );
+
+      for(
+        const variant
+        of variants
+      ){
+
+        try{
+
+          const img =
+            await canvasToImageElement(
+              variant
+            );
+
+          const result =
+            await reader
+              .decodeFromImage(
+                img
+              );
+
+          if(result){
+
+            return result;
+
+          }
+
+        }catch(e){
+
+          /*
+            Prova la variante successiva.
+          */
+
+        }
+
+      }
+
+      return null;
+
+    }catch(e){
+
+      console.error(
+        "Errore lettore barcode:",
+        e
+      );
+
+      return null;
+
+    }
+
   }
 
   function openScanModal(){
-    scanModalOpen = true;
-    currentDeviceIndex = -1;
-    show($("modal-scan"));
-    startCameraPreview(undefined);
+
+    scanModalOpen =
+      true;
+
+    currentDeviceIndex =
+      -1;
+
+    show(
+      $("modal-scan")
+    );
+
+    startCameraPreview(
+      undefined
+    );
+
   }
 
   function closeScanModal(){
-    scanModalOpen = false;
+
+    scanModalOpen =
+      false;
+
     stopCameraStream();
-    hide($("modal-scan"));
+
+    hide(
+      $("modal-scan")
+    );
+
   }
 
-  $("btn-scan-close").addEventListener("click", ()=>{ closeScanModal(); });
-  $("btn-scan-denied-close").addEventListener("click", ()=>{ closeScanModal(); });
-  $("btn-scan-unavailable-close").addEventListener("click", ()=>{ closeScanModal(); });
-  $("btn-scan-denied-retry").addEventListener("click", ()=>{ startCameraPreview(undefined); });
-  $("btn-scan-unavailable-manual").addEventListener("click", ()=>{
-    closeScanModal();
-    openAddModal(null);
-  });
+  $("btn-scan-close")
+    .addEventListener(
+      "click",
+      ()=>{
+        closeScanModal();
+      }
+    );
 
-  $("btn-scan-switch-camera").addEventListener("click", async ()=>{
-    if(!videoInputDevices.length) return;
-    currentDeviceIndex = (currentDeviceIndex + 1) % videoInputDevices.length;
-    const nextDevice = videoInputDevices[currentDeviceIndex];
-    await startCameraPreview(nextDevice ? nextDevice.deviceId : undefined);
-  });
+  $("btn-scan-denied-close")
+    .addEventListener(
+      "click",
+      ()=>{
+        closeScanModal();
+      }
+    );
 
-  // Pulsante "Scatta foto": cattura il frame corrente e AVVIA l'analisi del barcode
-  $("btn-scan-capture").addEventListener("click", async ()=>{
-    if(!activeStream) return;
-    bcShowSheetState("bc-state-analyzing");
+  $("btn-scan-unavailable-close")
+    .addEventListener(
+      "click",
+      ()=>{
+        closeScanModal();
+      }
+    );
 
-    const canvas = captureFrameToCanvas();
-    let result = null;
-    try{
-      result = await decodeBarcodeFromCanvas(canvas);
-    }catch(e){
-      result = null;
+  $("btn-scan-denied-retry")
+    .addEventListener(
+      "click",
+      ()=>{
+        startCameraPreview(
+          undefined
+        );
+      }
+    );
+
+  $("btn-scan-unavailable-manual")
+    .addEventListener(
+      "click",
+      ()=>{
+        closeScanModal();
+        openAddModal(null);
+      }
+    );
+
+  $("btn-scan-switch-camera")
+    .addEventListener(
+      "click",
+      async ()=>{
+
+        if(
+          !videoInputDevices.length
+        ){
+          return;
+        }
+
+        currentDeviceIndex =
+          (
+            currentDeviceIndex + 1
+          ) %
+          videoInputDevices.length;
+
+        const nextDevice =
+          videoInputDevices[
+            currentDeviceIndex
+          ];
+
+        await startCameraPreview(
+          nextDevice
+            ? nextDevice.deviceId
+            : undefined
+        );
+
+      }
+    );
+
+  /* ==========================================================
+     SCATTA FOTO
+  ========================================================== */
+
+  $("btn-scan-capture")
+    .addEventListener(
+      "click",
+      async ()=>{
+
+        if(!activeStream){
+          return;
+        }
+
+        const canvas =
+          captureFrameToCanvas();
+
+        const preview =
+          $("bc-photo-preview");
+
+        if(preview){
+
+          preview.src =
+            canvas.toDataURL(
+              "image/jpeg",
+              0.92
+            );
+
+        }
+
+        bcShowSheetState(
+          "bc-state-analyzing"
+        );
+
+        let result =
+          null;
+
+        try{
+
+          result =
+            await decodeBarcodeFromCanvas(
+              canvas
+            );
+
+        }catch(e){
+
+          result =
+            null;
+
+        }
+
+        if(!result){
+
+          bcShowSheetState(
+            "bc-state-failed"
+          );
+
+          return;
+
+        }
+
+        const text =
+          result.getText
+            ? result.getText()
+            : String(result);
+
+        const format =
+          result.getBarcodeFormat
+            ? result.getBarcodeFormat()
+            : null;
+
+        const formatLabel =
+          ZXING_FORMAT_LABELS[
+            format
+          ] ||
+          "Sconosciuto";
+
+        $("bc-detected-code")
+          .textContent =
+            text;
+
+        $("bc-detected-format")
+          .textContent =
+            "Formato: " +
+            formatLabel;
+
+        bcShowSheetState(
+          "bc-state-confirm"
+        );
+
+        $("btn-bc-confirm")
+          .dataset.code =
+            text;
+
+      }
+    );
+
+  $("btn-bc-retry")
+    .addEventListener(
+      "click",
+      ()=>{
+        scanShowLiveState();
+      }
+    );
+
+  $("btn-bc-retry-2")
+    .addEventListener(
+      "click",
+      ()=>{
+        scanShowLiveState();
+      }
+    );
+
+  $("btn-bc-confirm")
+    .addEventListener(
+      "click",
+      async ()=>{
+
+        const code =
+          $("btn-bc-confirm")
+            .dataset
+            .code;
+
+        if(!code){
+          return;
+        }
+
+        bcShowSheetState(
+          "bc-state-searching"
+        );
+
+        await handleBarcodeResult(
+          code
+        );
+
+        closeScanModal();
+
+      }
+    );
+
+  /* ==========================================================
+     CATEGORIA AUTOMATICA
+  ========================================================== */
+
+  function inferCategoriaFromOpenFoodFacts(
+    product
+  ){
+
+    const text = [
+
+      product.categories || "",
+
+      Array.isArray(
+        product.categories_tags
+      )
+        ? product.categories_tags.join(" ")
+        : "",
+
+      product.product_name || "",
+
+      product.product_name_it || ""
+
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    const rules = [
+
+      [
+        "Latticini",
+        [
+          "milk",
+          "latte",
+          "yogurt",
+          "yoghurt",
+          "cheese",
+          "formaggio",
+          "mozzarella",
+          "burro",
+          "panna"
+        ]
+      ],
+
+      [
+        "Carne",
+        [
+          "meat",
+          "carne",
+          "beef",
+          "manzo",
+          "chicken",
+          "pollo",
+          "pork",
+          "maiale",
+          "turkey",
+          "tacchino"
+        ]
+      ],
+
+      [
+        "Pesce",
+        [
+          "fish",
+          "pesce",
+          "tuna",
+          "tonno",
+          "salmon",
+          "salmone",
+          "sardine",
+          "sardina"
+        ]
+      ],
+
+      [
+        "Frutta",
+        [
+          "fruit",
+          "frutta",
+          "apple",
+          "mela",
+          "banana",
+          "orange",
+          "arancia"
+        ]
+      ],
+
+      [
+        "Verdura",
+        [
+          "vegetable",
+          "verdura",
+          "tomato",
+          "pomodoro",
+          "lettuce",
+          "insalata",
+          "spinach",
+          "spinaci"
+        ]
+      ],
+
+      [
+        "Pasta e Riso",
+        [
+          "pasta",
+          "rice",
+          "riso",
+          "spaghetti",
+          "penne",
+          "fusilli"
+        ]
+      ],
+
+      [
+        "Pane e Prodotti da Forno",
+        [
+          "bread",
+          "pane",
+          "bakery",
+          "biscuit",
+          "biscotti",
+          "cracker",
+          "croissant"
+        ]
+      ],
+
+      [
+        "Conserve",
+        [
+          "canned",
+          "conserve",
+          "jar",
+          "vasetto",
+          "passata",
+          "legume"
+        ]
+      ],
+
+      [
+        "Surgelati",
+        [
+          "frozen",
+          "surgelato",
+          "surgelati"
+        ]
+      ],
+
+      [
+        "Bevande",
+        [
+          "beverage",
+          "bevanda",
+          "drink",
+          "juice",
+          "succo",
+          "water",
+          "acqua",
+          "cola",
+          "soda"
+        ]
+      ],
+
+      [
+        "Dolci",
+        [
+          "dessert",
+          "dolce",
+          "cake",
+          "torta",
+          "chocolate",
+          "cioccolato"
+        ]
+      ],
+
+      [
+        "Snack",
+        [
+          "snack",
+          "chips",
+          "patatine",
+          "popcorn"
+        ]
+      ],
+
+      [
+        "Salse e Condimenti",
+        [
+          "sauce",
+          "salsa",
+          "ketchup",
+          "mayonnaise",
+          "maionese",
+          "oil",
+          "olio",
+          "vinegar",
+          "aceto"
+        ]
+      ],
+
+      [
+        "Salumi",
+        [
+          "ham",
+          "prosciutto",
+          "salami",
+          "salame",
+          "charcuterie"
+        ]
+      ],
+
+      [
+        "Uova",
+        [
+          "egg",
+          "uova",
+          "oeuf"
+        ]
+      ]
+
+    ];
+
+    for(
+      const [
+        name,
+        keywords
+      ]
+      of rules
+    ){
+
+      if(
+        keywords.some(
+          k=>text.includes(k)
+        )
+      ){
+
+        const found =
+          categorie.find(
+            c=>c.nome===name
+          );
+
+        if(found){
+
+          return found.id;
+
+        }
+
+      }
+
     }
 
-    if(!result){
-      bcShowSheetState("bc-state-failed");
-      return;
-    }
+    const altro =
+      categorie.find(
+        c=>c.nome==="Altro"
+      );
 
-    const text = result.getText ? result.getText() : String(result);
-    const format = result.getBarcodeFormat ? result.getBarcodeFormat() : null;
-    const formatLabel = ZXING_FORMAT_LABELS[format] || "Sconosciuto";
-    $("bc-detected-code").textContent = text;
-    $("bc-detected-format").textContent = "Formato: " + formatLabel;
-    bcShowSheetState("bc-state-confirm");
-    $("btn-bc-confirm").dataset.code = text;
-  });
+    return altro
+      ? altro.id
+      : null;
 
-  // "Rifai foto": si torna semplicemente all'anteprima live (la fotocamera resta accesa)
-  $("btn-bc-retry").addEventListener("click", ()=>{ scanShowLiveState(); });
-  $("btn-bc-retry-2").addEventListener("click", ()=>{ scanShowLiveState(); });
+  }
 
-  $("btn-bc-confirm").addEventListener("click", async ()=>{
-    const code = $("btn-bc-confirm").dataset.code;
-    if(!code) return;
-    bcShowSheetState("bc-state-searching");
-    await handleBarcodeResult(code);
-    closeScanModal();
-  });
+  /* ==========================================================
+     GESTIONE BARCODE
+  ========================================================== */
 
-  async function handleBarcodeResult(barcode){
+  async function handleBarcodeResult(
+    barcode
+  ){
+
     try{
-      if(isOffline()) throw new Error("offline");
 
-      const { data: prodottoLocale, error: err1 } = await supabase
-        .from("prodotti")
-        .select("*")
-        .eq("codice_barre", barcode)
-        .maybeSingle();
-      if(err1) throw err1;
+      if(isOffline()){
+        throw new Error("offline");
+      }
+
+      /* PRIMA SUPABASE */
+
+      const {
+        data:prodottoLocale,
+        error:err1
+      } =
+        await supabase
+          .from("prodotti")
+          .select("*")
+          .eq(
+            "codice_barre",
+            barcode
+          )
+          .maybeSingle();
+
+      if(err1){
+        throw err1;
+      }
 
       if(prodottoLocale){
+
         openAddModal({
-          prodotto_id: prodottoLocale.id,
-          codice_barre: barcode,
-          nome: prodottoLocale.nome,
-          marca: prodottoLocale.marca,
-          categoria_id: prodottoLocale.categoria_id,
-          immagine_url: prodottoLocale.immagine_url
+
+          prodotto_id:
+            prodottoLocale.id,
+
+          codice_barre:
+            barcode,
+
+          nome:
+            prodottoLocale.nome,
+
+          marca:
+            prodottoLocale.marca,
+
+          categoria_id:
+            prodottoLocale.categoria_id,
+
+          immagine_url:
+            prodottoLocale.immagine_url
+
         });
+
         return;
+
       }
 
-      toast("Ricerca prodotto in corso…");
-      let offProduct = null;
+      toast(
+        "Ricerca prodotto in corso…"
+      );
+
+      /* OPEN FOOD FACTS */
+
+      let offProduct =
+        null;
+
       try{
-        const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(barcode)}.json`);
+
+        const res =
+          await fetch(
+            "https://world.openfoodfacts.org/api/v2/product/" +
+            encodeURIComponent(
+              barcode
+            ) +
+            ".json"
+          );
+
         if(res.ok){
-          const json = await res.json();
-          if(json && json.status === 1 && json.product){
-            offProduct = json.product;
+
+          const json =
+            await res.json();
+
+          if(
+            json &&
+            json.status === 1 &&
+            json.product
+          ){
+
+            offProduct =
+              json.product;
+
           }
+
         }
-      }catch(e){ /* ignora, procedi come non trovato */ }
+
+      }catch(e){
+
+        console.error(
+          "Errore Open Food Facts:",
+          e
+        );
+
+      }
 
       if(offProduct){
-        const nome = offProduct.product_name || offProduct.product_name_it || "";
-        const marca = (offProduct.brands || "").split(",")[0].trim();
-        const immagine = offProduct.image_url || null;
-        const altroCategoria = categorie.find(c=>c.nome==="Altro");
 
-        const { data: nuovoProdotto } = await supabase
-          .from("prodotti")
-          .upsert({
-            codice_barre: barcode,
-            nome: nome || "Prodotto sconosciuto",
-            marca: marca || null,
-            categoria_id: altroCategoria ? altroCategoria.id : null,
-            immagine_url: immagine,
-            updated_at: new Date().toISOString()
-          }, { onConflict: "codice_barre" })
-          .select()
-          .single();
+        const nome =
+          offProduct.product_name_it ||
+          offProduct.product_name ||
+          "";
+
+        const marca =
+          (
+            offProduct.brands ||
+            ""
+          )
+            .split(",")[0]
+            .trim();
+
+        const immagine =
+          offProduct.image_url ||
+          null;
+
+        const categoriaId =
+          inferCategoriaFromOpenFoodFacts(
+            offProduct
+          );
+
+        const {
+          data:nuovoProdotto
+        } =
+          await supabase
+            .from("prodotti")
+            .upsert(
+              {
+
+                codice_barre:
+                  barcode,
+
+                nome:
+                  nome ||
+                  "Prodotto sconosciuto",
+
+                marca:
+                  marca ||
+                  null,
+
+                categoria_id:
+                  categoriaId,
+
+                immagine_url:
+                  immagine,
+
+                updated_at:
+                  new Date().toISOString()
+
+              },
+              {
+                onConflict:
+                  "codice_barre"
+              }
+            )
+            .select()
+            .single();
 
         openAddModal({
-          prodotto_id: nuovoProdotto ? nuovoProdotto.id : null,
-          codice_barre: barcode,
-          nome: nome,
-          marca: marca,
-          categoria_id: altroCategoria ? altroCategoria.id : null,
-          immagine_url: immagine
+
+          prodotto_id:
+            nuovoProdotto
+              ? nuovoProdotto.id
+              : null,
+
+          codice_barre:
+            barcode,
+
+          nome:
+            nome,
+
+          marca:
+            marca,
+
+          categoria_id:
+            categoriaId,
+
+          immagine_url:
+            immagine
+
         });
+
       }else{
-        toast("Prodotto non trovato. Inseriscilo manualmente.", "error");
-        openAddModal({ codice_barre: barcode, nome:"", marca:"" });
+
+        toast(
+          "Prodotto non trovato. Inseriscilo manualmente.",
+          "error"
+        );
+
+        openAddModal({
+
+          codice_barre:
+            barcode,
+
+          nome:
+            "",
+
+          marca:
+            ""
+
+        });
+
       }
+
     }catch(err){
-      toast(friendlyError("generic"), "error");
-      openAddModal({ codice_barre: barcode, nome:"", marca:"" });
+
+      console.error(
+        "Errore ricerca prodotto:",
+        err
+      );
+
+      toast(
+        err?.message &&
+        err.message !== "offline"
+          ? "Supabase: " +
+            err.message
+          : friendlyError(
+              "generic"
+            ),
+        "error"
+      );
+
+      openAddModal({
+
+        codice_barre:
+          barcode,
+
+        nome:
+          "",
+
+        marca:
+          ""
+
+      });
+
     }
+
   }
 
-  /* ============== AVVIO APP ============== */
+  /* ==========================================================
+     AVVIO
+  ========================================================== */
+
   async function init(){
-    hide($("screen-loading"));
-    show($("app"));
+
+    hide(
+      $("screen-loading")
+    );
+
+    show(
+      $("app")
+    );
+
     resetFoodForm();
+
     await loadCategorie();
+
     resetFoodForm();
+
     await loadAlimenti();
+
     subscribeRealtime();
+
   }
 
-  window.addEventListener("online", ()=> toast("Connessione ripristinata", "success"));
-  window.addEventListener("offline", ()=> toast(friendlyError("generic"), "error"));
+  window.addEventListener(
+    "online",
+    ()=>{
+      toast(
+        "Connessione ripristinata",
+        "success"
+      );
 
-  // Anche in caso di errore imprevisto in init(), la dashboard deve
-  // comunque essere mostrata (niente spinner infinito) e i pulsanti
-  // devono restare utilizzabili.
-  init().catch(err=>{
-    console.error("Errore di avvio:", err);
-    hide($("screen-loading"));
-    show($("app"));
-    toast(friendlyError("generic"), "error");
-  });
+      loadAlimenti();
+
+    }
+  );
+
+  window.addEventListener(
+    "offline",
+    ()=>{
+      toast(
+        "Connessione internet assente.",
+        "error"
+      );
+    }
+  );
+
+  init().catch(
+    err=>{
+
+      console.error(
+        "Errore di avvio:",
+        err
+      );
+
+      hide(
+        $("screen-loading")
+      );
+
+      show(
+        $("app")
+      );
+
+      toast(
+        friendlyError(
+          "generic"
+        ),
+        "error"
+      );
+
+    }
+  );
+
 })();
 </script>
+
 </body>
 </html>
