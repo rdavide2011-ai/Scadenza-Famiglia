@@ -1175,6 +1175,340 @@
       opacity:1;
     }
   }
+
+  /* ==========================================================
+     MOBILE / TELEFONO
+     Layout ottimizzato per schermi stretti e touch
+  ========================================================== */
+
+  @media (max-width: 700px){
+
+    html{
+      width:100%;
+      overflow-x:hidden;
+    }
+
+    body{
+      width:100%;
+      min-width:0;
+      overflow-x:hidden;
+      overscroll-behavior-x:none;
+    }
+
+    #app{
+      width:100%;
+      max-width:none;
+      margin:0;
+      padding-bottom:96px;
+    }
+
+    header.topbar{
+      padding:
+        calc(11px + var(--safe-top))
+        12px
+        11px;
+    }
+
+    .topbar-row{
+      margin-bottom:11px;
+    }
+
+    .topbar-title-wrap{
+      gap:9px;
+      min-width:0;
+    }
+
+    .brand-mark{
+      width:34px;
+      height:34px;
+      border-radius:10px;
+      font-size:17px;
+    }
+
+    .topbar-title{
+      font-size:17px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .stats-row{
+      grid-template-columns:repeat(2,1fr);
+      gap:7px;
+      margin-bottom:10px;
+    }
+
+    .stat-chip{
+      min-width:0;
+      padding:8px 5px;
+      border-radius:11px;
+    }
+
+    .stat-chip .num{
+      font-size:18px;
+    }
+
+    .stat-chip .lbl{
+      font-size:9.5px;
+      letter-spacing:.25px;
+    }
+
+    .search-wrap{
+      margin-bottom:9px;
+    }
+
+    .search-wrap input{
+      min-height:46px;
+      padding:11px 12px 11px 39px;
+      border-radius:12px;
+      font-size:15px;
+    }
+
+    .filters-row{
+      gap:7px;
+      margin-right:-2px;
+      padding-bottom:3px;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    .chip{
+      min-height:38px;
+      display:flex;
+      align-items:center;
+      padding:8px 12px;
+      font-size:12.5px;
+    }
+
+    .filters-row2{
+      display:flex;
+      gap:7px;
+      margin-top:8px;
+    }
+
+    .filters-row2 .select-mini{
+      min-width:0;
+      width:50%;
+      min-height:42px;
+      font-size:12px;
+    }
+
+    main.content{
+      padding:12px 12px 6px;
+    }
+
+    .section-empty{
+      padding:52px 14px;
+    }
+
+    .food-card{
+      padding:11px;
+      margin-bottom:8px;
+      gap:9px;
+      border-radius:13px;
+    }
+
+    .food-emoji{
+      width:40px;
+      height:40px;
+      border-radius:10px;
+      font-size:24px;
+    }
+
+    .food-name{
+      font-size:14.5px;
+      line-height:1.3;
+    }
+
+    .food-brand{
+      font-size:12px;
+      margin-bottom:6px;
+    }
+
+    .food-meta{
+      gap:5px;
+      margin-bottom:6px;
+    }
+
+    .meta-tag{
+      font-size:10.5px;
+      padding:3px 7px;
+    }
+
+    .status-badge{
+      font-size:11px;
+      padding:4px 8px;
+    }
+
+    .qty-control{
+      min-height:32px;
+    }
+
+    .qty-control button{
+      width:28px;
+      height:28px;
+      font-size:16px;
+    }
+
+    .qty-control .qty-value{
+      min-width:30px;
+    }
+
+    .food-actions{
+      gap:5px;
+    }
+
+    .food-actions button{
+      width:34px;
+      height:34px;
+      border-radius:9px;
+    }
+
+    .fab{
+      right:14px;
+      bottom:calc(14px + var(--safe-bottom));
+      width:56px;
+      height:56px;
+      font-size:27px;
+    }
+
+    .modal-overlay{
+      align-items:flex-end;
+      padding:0;
+    }
+
+    .modal-overlay.center{
+      align-items:flex-end;
+      padding:0;
+    }
+
+    .modal-sheet,
+    .modal-overlay.center .modal-sheet{
+      width:100%;
+      max-width:none;
+      max-height:
+        calc(94vh - var(--safe-top));
+      border-radius:22px 22px 0 0;
+      border-bottom:0;
+      padding:
+        8px 14px
+        calc(18px + var(--safe-bottom));
+    }
+
+    .modal-header{
+      margin-bottom:13px;
+    }
+
+    .modal-header h2{
+      font-size:17px;
+    }
+
+    .modal-close{
+      width:36px;
+      height:36px;
+    }
+
+    .grid-2{
+      grid-template-columns:1fr;
+      gap:0;
+    }
+
+    .field{
+      margin-bottom:13px;
+    }
+
+    .field label{
+      font-size:12.5px;
+      margin-bottom:6px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea{
+      min-height:46px;
+      padding:12px;
+      font-size:16px;
+      border-radius:11px;
+    }
+
+    .field textarea{
+      min-height:92px;
+    }
+
+    .btn{
+      min-height:48px;
+      padding:13px 15px;
+      font-size:15px;
+    }
+
+    .scan-cta{
+      min-height:50px;
+      padding:12px;
+      font-size:14px;
+    }
+
+    /* Scanner: sfrutta bene l'altezza del telefono */
+    .scan-topbar{
+      padding:
+        calc(11px + var(--safe-top))
+        12px
+        10px;
+    }
+
+    .scan-icon-btn{
+      width:40px;
+      height:40px;
+    }
+
+    .scan-frame-box{
+      width:88%;
+      max-width:360px;
+      aspect-ratio:16/9;
+      border-radius:14px;
+    }
+
+    .scan-hint{
+      max-width:280px;
+      padding:0 10px;
+      text-align:center;
+      font-size:13px;
+    }
+
+  }
+
+  @media (max-width: 380px){
+
+    .topbar-title{
+      font-size:16px;
+    }
+
+    .stat-chip .num{
+      font-size:17px;
+    }
+
+    .stat-chip .lbl{
+      font-size:9px;
+    }
+
+    .food-card{
+      padding:10px;
+    }
+
+    .food-emoji{
+      width:38px;
+      height:38px;
+    }
+
+    .food-actions button{
+      width:32px;
+      height:32px;
+    }
+
+    .filters-row2 .select-mini{
+      font-size:11px;
+    }
+
+  }
+
 </style>
 </head>
 
