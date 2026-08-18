@@ -217,13 +217,17 @@
   .scan-frame-box .corner.tr{top:-2px;right:-2px;border-left:none;border-bottom:none;border-radius:0 10px 0 0;}
   .scan-frame-box .corner.bl{bottom:-2px;left:-2px;border-right:none;border-top:none;border-radius:0 0 0 10px;}
   .scan-frame-box .corner.br{bottom:-2px;right:-2px;border-left:none;border-top:none;border-radius:0 0 10px 0;}
-  .scan-frame-box .scan-line{position:absolute;left:4%;right:4%;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);top:50%;animation:scanLine 1.8s ease-in-out infinite;}
-  @keyframes scanLine{0%,100%{top:10%;}50%{top:88%;}}
   .scan-hint{color:#fff;font-size:14.5px;font-weight:600;margin-top:18px;text-shadow:0 1px 6px rgba(0,0,0,.5);text-align:center;padding:0 24px;}
-  .scan-nodetect-banner{
-    position:absolute;left:16px;right:16px;bottom:24px;background:rgba(20,20,20,.85);backdrop-filter:blur(8px);
-    border:1px solid rgba(255,255,255,.15);border-radius:13px;padding:12px 14px;color:#fff;font-size:13px;line-height:1.5;text-align:center;
+  .scan-capture-row{
+    position:absolute;left:0;right:0;bottom:calc(28px + var(--safe-bottom));z-index:6;
+    display:flex;align-items:center;justify-content:center;
   }
+  .scan-capture-btn{
+    display:flex;align-items:center;gap:10px;background:var(--accent);color:#04222f;border:none;
+    padding:15px 26px;border-radius:30px;font-weight:700;font-size:15.5px;cursor:pointer;
+    box-shadow:0 10px 26px rgba(56,189,248,.4);
+  }
+  .scan-capture-btn:active{transform:scale(.96);}
   .scan-status-panel{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;background:#0c1310;}
   .scan-status-panel .ic{font-size:40px;margin-bottom:14px;}
   .scan-status-panel h3{color:#fff;font-family:'Sora';font-size:17px;margin:0 0 8px;}
@@ -234,13 +238,17 @@
     animation:slideUp .22s ease-out;
   }
   .bc-state{text-align:center;}
+  .bc-analyzing{display:flex;flex-direction:column;align-items:center;gap:12px;padding:10px 0 4px;}
+  .bc-analyzing .spinner{border-top-color:var(--accent);}
+  .bc-analyzing p{color:var(--text-muted);font-size:14px;margin:0;}
   .bc-code-box{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:16px;margin:0 0 6px;}
   .bc-code-box .lbl{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
   .bc-code-box .code{font-family:'Sora';font-weight:800;font-size:24px;letter-spacing:2px;color:var(--accent);}
   .bc-code-box .fmt{font-size:12px;color:var(--text-faint);margin-top:4px;}
   .bc-question{font-size:14.5px;color:var(--text);margin:14px 0 14px;font-weight:600;text-align:center;}
   .bc-fail-icon{font-size:36px;display:block;margin-bottom:10px;}
-  .bc-fail-msg{color:var(--text-muted);font-size:14.5px;line-height:1.5;margin:0 0 20px;text-align:center;}
+  .bc-fail-msg{color:var(--text-muted);font-size:14.5px;line-height:1.5;margin:0 0 6px;text-align:left;}
+  .bc-fail-tips{color:var(--text-muted);font-size:13.5px;line-height:1.7;margin:0 0 20px;padding-left:18px;text-align:left;}
   .bc-searching{display:flex;flex-direction:column;align-items:center;gap:12px;padding:10px 0 4px;}
   .bc-searching .spinner{border-top-color:var(--accent);}
   .bc-searching p{color:var(--text-muted);font-size:14px;margin:0;}
@@ -337,20 +345,20 @@
     <div class="modal-handle"></div>
     <div class="modal-header"><h2>Aggiungi alimento</h2><button class="modal-close" data-close="modal-choice">✕</button></div>
     <div class="scan-btn-row">
-      <button class="scan-cta" id="btn-open-scan"><span class="ic">📷</span> Scansiona codice a barre</button>
+      <button class="scan-cta" id="btn-open-scan"><span class="ic">📷</span> Fotografa codice a barre</button>
     </div>
     <div class="divider-text">oppure</div>
     <button class="btn btn-ghost" id="btn-manual-add">Inserisci manualmente</button>
   </div>
 </div>
 
-<!-- MODAL: SCANSIONE LIVE CODICE A BARRE -->
+<!-- MODAL: FOTOCAMERA INTEGRATA PER CODICE A BARRE -->
 <div class="scan-modal-overlay hidden" id="modal-scan">
 
-  <!-- stato: fotocamera live -->
+  <!-- stato: fotocamera live, in attesa dello scatto -->
   <div id="scan-state-live" class="hidden">
     <div class="scan-topbar">
-      <span class="scan-title">Scansiona codice a barre</span>
+      <span class="scan-title">Codice a barre</span>
       <div style="display:flex;gap:8px;">
         <button class="scan-icon-btn hidden" id="btn-scan-switch-camera" title="Cambia fotocamera">🔄</button>
         <button class="scan-icon-btn" id="btn-scan-close" title="Chiudi">✕</button>
@@ -362,12 +370,11 @@
         <div class="scan-frame-box">
           <div class="corner tl"></div><div class="corner tr"></div>
           <div class="corner bl"></div><div class="corner br"></div>
-          <div class="scan-line"></div>
         </div>
         <p class="scan-hint">Inquadra il codice a barre</p>
       </div>
-      <div class="scan-nodetect-banner hidden" id="scan-nodetect-banner">
-        Non riesco a rilevare il codice. Avvicina o allontana il prodotto e assicurati che il codice sia ben illuminato.
+      <div class="scan-capture-row">
+        <button class="scan-capture-btn" id="btn-scan-capture">📸 Scatta foto</button>
       </div>
     </div>
   </div>
@@ -376,7 +383,7 @@
   <div class="scan-status-panel hidden" id="scan-state-denied">
     <span class="ic">🚫</span>
     <h3>Accesso alla fotocamera negato</h3>
-    <p>Per scansionare un codice a barre devi consentire l'accesso alla fotocamera.</p>
+    <p>Per fotografare un codice a barre devi consentire l'accesso alla fotocamera.</p>
     <div class="grid-2" style="max-width:320px;width:100%;">
       <button class="btn btn-ghost" id="btn-scan-denied-close">Chiudi</button>
       <button class="btn btn-primary" id="btn-scan-denied-retry">Riprova</button>
@@ -394,8 +401,16 @@
     </div>
   </div>
 
-  <!-- pannello inferiore: conferma / ricerca (mostrato sopra il video quando presente) -->
+  <!-- pannello inferiore: analisi foto / conferma / esito / ricerca -->
   <div class="scan-bottom-sheet hidden" id="scan-bottom-sheet">
+    <!-- stato: analisi della foto scattata -->
+    <div class="bc-state hidden" id="bc-state-analyzing">
+      <div class="bc-analyzing">
+        <div class="spinner"></div>
+        <p>Analizzo la foto...</p>
+      </div>
+    </div>
+
     <!-- stato: codice rilevato, richiesta conferma -->
     <div class="bc-state hidden" id="bc-state-confirm">
       <div class="bc-code-box">
@@ -403,10 +418,25 @@
         <div class="code" id="bc-detected-code">-</div>
         <div class="fmt" id="bc-detected-format">-</div>
       </div>
+      <p class="bc-question">Il codice è corretto?</p>
       <div class="grid-2">
-        <button class="btn btn-ghost" id="btn-bc-retry">↻ Scansiona di nuovo</button>
+        <button class="btn btn-ghost" id="btn-bc-retry">↻ Rifai foto</button>
         <button class="btn btn-primary" id="btn-bc-confirm">✓ Usa questo codice</button>
       </div>
+    </div>
+
+    <!-- stato: barcode non riconosciuto dalla foto -->
+    <div class="bc-state hidden" id="bc-state-failed">
+      <span class="bc-fail-icon">🔎</span>
+      <p class="bc-fail-msg">Non riesco a leggere il codice a barre dalla foto.</p>
+      <ul class="bc-fail-tips">
+        <li>Avvicina il prodotto</li>
+        <li>Assicurati che il barcode sia completamente visibile</li>
+        <li>Evita riflessi</li>
+        <li>Assicurati che ci sia abbastanza luce</li>
+        <li>Tieni il telefono fermo</li>
+      </ul>
+      <button class="btn btn-primary" id="btn-bc-retry-2">📸 Rifai foto</button>
     </div>
 
     <!-- stato: ricerca prodotto in corso -->
@@ -415,6 +445,7 @@
         <div class="spinner"></div>
         <p>Cerco il prodotto...</p>
       </div>
+
     </div>
   </div>
 </div>
@@ -931,7 +962,7 @@
     }
   });
 
-  /* ============== SCANSIONE LIVE CODICE A BARRE (ZXing + getUserMedia) ============== */
+  /* ============== FOTOCAMERA INTEGRATA + ANALISI FOTO SCATTATA (getUserMedia + ZXing) ============== */
   const ZXING_FORMAT_LABELS = (function(){
     if(typeof ZXing === "undefined") return {};
     const BF = ZXing.BarcodeFormat;
@@ -945,11 +976,10 @@
     return map;
   })();
 
-  let zxingReader = null;          // istanza condivisa del lettore ZXing
-  let zxingControls = null;        // controlli dello scan attivo (per fermarlo)
+  let zxingReader = null;          // istanza condivisa del lettore ZXing (usata SOLO per analizzare la foto scattata)
+  let activeStream = null;         // stream della fotocamera attualmente in anteprima nella pagina
   let videoInputDevices = [];      // elenco fotocamere disponibili
   let currentDeviceIndex = -1;     // indice fotocamera attualmente in uso
-  let noDetectTimer = null;        // timer per il messaggio "nessun codice rilevato"
   let scanModalOpen = false;
 
   function getZxingReader(){
@@ -990,30 +1020,16 @@
 
   function bcShowSheetState(stateId){
     show($("scan-bottom-sheet"));
-    ["bc-state-confirm","bc-state-searching"].forEach(id=>{
+    ["bc-state-analyzing","bc-state-confirm","bc-state-failed","bc-state-searching"].forEach(id=>{
       if(id === stateId) show($(id)); else hide($(id));
     });
   }
 
-  function clearNoDetectTimer(){
-    if(noDetectTimer){ clearTimeout(noDetectTimer); noDetectTimer = null; }
-    hide($("scan-nodetect-banner"));
-  }
-  function armNoDetectTimer(){
-    clearNoDetectTimer();
-    noDetectTimer = setTimeout(()=>{
-      show($("scan-nodetect-banner"));
-    }, 6000);
-  }
-
+  // Elenca le fotocamere disponibili (le label sono visibili solo dopo che il permesso è stato concesso)
   async function refreshVideoInputDevices(){
     try{
-      if(ZXing.BrowserCodeReader && typeof ZXing.BrowserCodeReader.listVideoInputDevices === "function"){
-        videoInputDevices = await ZXing.BrowserCodeReader.listVideoInputDevices();
-      }else{
-        const reader = getZxingReader();
-        videoInputDevices = await reader.listVideoInputDevices();
-      }
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      videoInputDevices = devices.filter(d=>d.kind === "videoinput");
     }catch(e){
       videoInputDevices = [];
     }
@@ -1024,47 +1040,41 @@
     }
   }
 
-  async function startLiveScan(deviceId){
+  function stopCameraStream(){
+    if(activeStream){
+      activeStream.getTracks().forEach(t=>{ try{ t.stop(); }catch(e){} });
+      activeStream = null;
+    }
+    const video = $("scan-video");
+    if(video) video.srcObject = null;
+  }
+
+  // Avvia SOLO l'anteprima della fotocamera dentro la pagina (getUserMedia + <video>).
+  // Non viene effettuata alcuna analisi automatica del video: il riconoscimento
+  // del barcode parte esclusivamente quando l'utente preme "Scatta foto".
+  async function startCameraPreview(deviceId){
     scanShowLiveState();
-    clearNoDetectTimer();
+    stopCameraStream();
 
-    const reader = getZxingReader();
     const constraints = deviceId
-      ? { video: { deviceId: { exact: deviceId } } }
-      : { video: { facingMode: { ideal: "environment" } } };
-
-    const onDecodeCallback = (result, err)=>{
-      if(result){
-        onBarcodeDetected(result);
-      }
-      // err è emesso ad ogni frame in cui non viene trovato nulla: è normale, si ignora.
-    };
+      ? { video: { deviceId: { exact: deviceId } }, audio: false }
+      : { video: { facingMode: { ideal: "environment" } }, audio: false };
 
     try{
-      if(typeof reader.decodeFromConstraints === "function"){
-        zxingControls = await reader.decodeFromConstraints(constraints, "scan-video", onDecodeCallback);
-      }else{
-        // fallback per build meno recenti della libreria senza decodeFromConstraints
-        zxingControls = await reader.decodeFromVideoDevice(deviceId || null, "scan-video", onDecodeCallback);
-      }
-      armNoDetectTimer();
+      activeStream = await navigator.mediaDevices.getUserMedia(constraints);
+      const video = $("scan-video");
+      video.srcObject = activeStream;
+      await video.play().catch(()=>{});
+
       await refreshVideoInputDevices();
       if(currentDeviceIndex === -1 && videoInputDevices.length){
-        let activeId = null;
-        try{
-          if(zxingControls && typeof zxingControls.streamVideoSettingsGet === "function"){
-            const settings = zxingControls.streamVideoSettingsGet();
-            activeId = settings ? settings.deviceId : null;
-          }else if(zxingControls && zxingControls.stream){
-            const track = zxingControls.stream.getVideoTracks()[0];
-            activeId = track && track.getSettings ? track.getSettings().deviceId : null;
-          }
-        }catch(e){ activeId = null; }
+        const track = activeStream.getVideoTracks()[0];
+        const activeId = track && track.getSettings ? track.getSettings().deviceId : null;
         const idx = activeId ? videoInputDevices.findIndex(d=>d.deviceId === activeId) : -1;
         currentDeviceIndex = idx > -1 ? idx : 0;
       }
     }catch(err){
-      if(err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")){
+      if(err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError" || err.name === "SecurityError")){
         scanShowDenied();
       }else{
         scanShowUnavailable();
@@ -1072,43 +1082,55 @@
     }
   }
 
-  function stopLiveScan(){
-    clearNoDetectTimer();
-    if(zxingControls){
-      try{ zxingControls.stop(); }catch(e){}
-      zxingControls = null;
-    }
+  // Cattura un singolo frame dal video live in un <canvas>
+  function captureFrameToCanvas(){
+    const video = $("scan-video");
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return canvas;
   }
 
-  function onBarcodeDetected(result){
-    clearNoDetectTimer();
-    stopLiveScan();
-    const text = result.getText ? result.getText() : String(result);
-    const format = result.getBarcodeFormat ? result.getBarcodeFormat() : null;
-    const formatLabel = ZXING_FORMAT_LABELS[format] || "Sconosciuto";
-    $("bc-detected-code").textContent = text;
-    $("bc-detected-format").textContent = "Formato: " + formatLabel;
-    bcShowSheetState("bc-state-confirm");
-    $("btn-bc-confirm").dataset.code = text;
+  function canvasToImageElement(canvas){
+    return new Promise((resolve, reject)=>{
+      const img = new Image();
+      img.onload = ()=> resolve(img);
+      img.onerror = reject;
+      img.src = canvas.toDataURL("image/png");
+    });
+  }
+
+  // Analizza la FOTO scattata (non il flusso video) con ZXing: vero riconoscimento
+  // barcode da immagine, non OCR.
+  async function decodeBarcodeFromCanvas(canvas){
+    const reader = getZxingReader();
+    const img = await canvasToImageElement(canvas);
+    try{
+      return await reader.decodeFromImage(img);
+    }catch(e){
+      return null; // nessun barcode trovato in questa foto
+    }
   }
 
   function openScanModal(){
     scanModalOpen = true;
     currentDeviceIndex = -1;
     show($("modal-scan"));
-    startLiveScan(undefined);
+    startCameraPreview(undefined);
   }
 
   function closeScanModal(){
     scanModalOpen = false;
-    stopLiveScan();
+    stopCameraStream();
     hide($("modal-scan"));
   }
 
   $("btn-scan-close").addEventListener("click", ()=>{ closeScanModal(); });
   $("btn-scan-denied-close").addEventListener("click", ()=>{ closeScanModal(); });
   $("btn-scan-unavailable-close").addEventListener("click", ()=>{ closeScanModal(); });
-  $("btn-scan-denied-retry").addEventListener("click", ()=>{ startLiveScan(undefined); });
+  $("btn-scan-denied-retry").addEventListener("click", ()=>{ startCameraPreview(undefined); });
   $("btn-scan-unavailable-manual").addEventListener("click", ()=>{
     closeScanModal();
     openAddModal(null);
@@ -1116,18 +1138,41 @@
 
   $("btn-scan-switch-camera").addEventListener("click", async ()=>{
     if(!videoInputDevices.length) return;
-    stopLiveScan();
     currentDeviceIndex = (currentDeviceIndex + 1) % videoInputDevices.length;
     const nextDevice = videoInputDevices[currentDeviceIndex];
-    await startLiveScan(nextDevice ? nextDevice.deviceId : undefined);
+    await startCameraPreview(nextDevice ? nextDevice.deviceId : undefined);
   });
 
-  $("btn-bc-retry").addEventListener("click", ()=>{
-    const deviceId = (currentDeviceIndex > -1 && videoInputDevices[currentDeviceIndex])
-      ? videoInputDevices[currentDeviceIndex].deviceId
-      : undefined;
-    startLiveScan(deviceId);
+  // Pulsante "Scatta foto": cattura il frame corrente e AVVIA l'analisi del barcode
+  $("btn-scan-capture").addEventListener("click", async ()=>{
+    if(!activeStream) return;
+    bcShowSheetState("bc-state-analyzing");
+
+    const canvas = captureFrameToCanvas();
+    let result = null;
+    try{
+      result = await decodeBarcodeFromCanvas(canvas);
+    }catch(e){
+      result = null;
+    }
+
+    if(!result){
+      bcShowSheetState("bc-state-failed");
+      return;
+    }
+
+    const text = result.getText ? result.getText() : String(result);
+    const format = result.getBarcodeFormat ? result.getBarcodeFormat() : null;
+    const formatLabel = ZXING_FORMAT_LABELS[format] || "Sconosciuto";
+    $("bc-detected-code").textContent = text;
+    $("bc-detected-format").textContent = "Formato: " + formatLabel;
+    bcShowSheetState("bc-state-confirm");
+    $("btn-bc-confirm").dataset.code = text;
   });
+
+  // "Rifai foto": si torna semplicemente all'anteprima live (la fotocamera resta accesa)
+  $("btn-bc-retry").addEventListener("click", ()=>{ scanShowLiveState(); });
+  $("btn-bc-retry-2").addEventListener("click", ()=>{ scanShowLiveState(); });
 
   $("btn-bc-confirm").addEventListener("click", async ()=>{
     const code = $("btn-bc-confirm").dataset.code;
